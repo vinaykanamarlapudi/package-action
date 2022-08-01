@@ -1,4 +1,5 @@
 import * as core from '@actions/core'
+import * as exec from '@actions/exec'
 import {wait} from './wait'
 
 async function run(): Promise<void> {
@@ -11,8 +12,27 @@ async function run(): Promise<void> {
     core.debug(new Date().toTimeString())
 
     core.setOutput('time', new Date().toTimeString())
+
+    const TOKEN: string = core.getInput('token');
+    core.setSecret(TOKEN);
+    const repoInput: string = core.getInput('repository');
+    const repoDetails: string[] = repoInput.split("/");
+    const repositoryOwner: string = repoDetails[0];
+    const repositoryName: string = repoDetails[1];
+    const semver: string = core.getInput('semver');
+
+    await publishOciArtifact(repoDetails, semver);
+
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
+  }
+}
+
+async function publishOciArtifact(repoDetails: string[], semver: string): Promise<void> {
+  try {
+    
+  } catch (error) {
+    if (error instanceof Error) core.setFailed(`Oops! Action package push to GHCR failed!`)
   }
 }
 

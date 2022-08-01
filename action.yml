@@ -1,11 +1,25 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Package and Publish'
+description: 'Publish actions as OCI artifacts to GHCR'
 inputs:
   milliseconds: # change this
     required: true
     description: 'input description here'
-    default: 'default value if applicable'
+    default: '10'
+  repository:
+    required: true
+    description: 'Repository name with owner. For example, actions/package-action'
+    default: ${{ github.repository }}
+  token:
+    required: true
+    description: >
+      GITHUB_TOKEN having the write:package scope to publish an action package to GHCR.
+    default: ${{ github.token }}
+  semver:
+    required: true
+    description: 'Release version'
+outputs:
+  package-url: 
+    description: 'The name of package published to GHCR along with semver. For example, https://ghcr.io/actions/package-action:1.0.1'
 runs:
   using: 'node16'
   main: 'dist/index.js'
