@@ -1,6 +1,7 @@
 import * as core from '@actions/core'
 // import * as exec from '@actions/exec'
 import axios from 'axios'
+import { stringify } from 'querystring'
 import {wait} from './wait'
 
 async function run(): Promise<void> {
@@ -15,10 +16,8 @@ async function run(): Promise<void> {
     core.setOutput('time', new Date().toTimeString())
 
     
-    const repoInput = process.env.GITHUB_REPOSITORY;
-    const repoDetails: string[] = repoInput.split("/");
-    const repositoryOwner: string = repoDetails[0];
-    const repositoryName: string = repoDetails[1];
+    const repoInput: string = process!.env!.GITHUB_REPOSITORY || "Hello";
+    // const repoDetails = repoInput!.split("/");
     const semver: string = core.getInput('semver');
 
     await publishOciArtifact(repoInput, semver);
