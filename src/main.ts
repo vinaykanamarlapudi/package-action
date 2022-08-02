@@ -15,7 +15,7 @@ async function run(): Promise<void> {
     core.setOutput('time', new Date().toTimeString())
 
     
-    const repoInput: string = process.env.GITHUB_REPOSITORY;
+    const repoInput = process.env.GITHUB_REPOSITORY;
     const repoDetails: string[] = repoInput.split("/");
     const repositoryOwner: string = repoDetails[0];
     const repositoryName: string = repoDetails[1];
