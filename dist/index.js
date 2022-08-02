@@ -88,9 +88,10 @@ function publishOciArtifact(repoInput, semver) {
             //     const payload = {
             //       tarball: await createTarBall(workdir)
             //     }
+            const repoDetails = repoInput.split("/");
             const payload = {
-                owner: 'OWNER',
-                repo: 'REPO',
+                owner: repoDetails[0],
+                repo: repoDetails[1],
                 tag_name: 'v1.0.0',
                 target_commitish: 'master',
                 name: 'v1.0.0',
