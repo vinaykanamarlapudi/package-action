@@ -113,8 +113,38 @@ function publishOciArtifact(repoInput, semver) {
             }
         }
         catch (error) {
-            if (error instanceof Error)
-                core.setFailed(`Oops! Action package push to GHCR failed!`);
+            // if (error instanceof Error) core.setFailed(`Oops! Action package push to GHCR failed!`)
+            // output raw error in debug mode.
+            core.debug(JSON.stringify(error));
+            // build customized error message based on server response
+            if (error instanceof Error) {
+                core.info(`Printing error:\n${JSON.stringify(error, null, '\t')}`);
+                core.info(error.stack || "Hey");
+                let errorMessage = `Failed to create Package (status: ) with release version ${semver}. `;
+                // if(error.response){
+                //  let errorMessage: string = `Failed to create Package (status: ${error.response.status}) with release version ${semver}. `
+                // if (error.response.status == 400) {
+                //   let message = ""
+                //   if (error.response.data && error.response.data.message) {
+                //     message = error.response.data.message
+                //   } else {
+                //     message = error.response.data
+                //   }
+                //   errorMessage += `Responded with: ${message}`
+                // }
+                // else if (error.response.status == 403) {
+                //   errorMessage += `Ensure GITHUB_TOKEN has permission "pages: write".`
+                // } else if (error.response.status == 404) {
+                //   errorMessage += `Ensure GitHub Pages has been enabled.`
+                // }
+                // else if (error.response.status >= 500) {
+                //   errorMessage += `Server error, is githubstatus.com reporting a Pages outage? Please re-run the deployment at a later time.`
+                // }
+                throw errorMessage;
+            }
+            else {
+                throw error;
+            }
         }
     });
 }
