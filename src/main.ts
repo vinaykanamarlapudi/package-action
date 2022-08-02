@@ -41,9 +41,21 @@ async function publishOciArtifact(repoInput: string, semver: string): Promise<vo
     const TOKEN: string = core.getInput('token');
     core.setSecret(TOKEN);
     const workdir: string = core.getInput('workdir');
-    const publishPackageEndpoint: string = `http://localhost:3000/repos/${repoInput}/actions/package/${semver}`;
+//     const publishPackageEndpoint: string = `http://localhost:3000/repos/${repoInput}/actions/package/${semver}`;
+    const publishPackageEndpoint: string = `https://api.github.com/repos/${repoInput}/releases`
+//     const payload = {
+//       tarball: await createTarBall(workdir)
+//     }
     const payload = {
-      tarball: await createTarBall(workdir)
+      owner: 'OWNER',
+      repo: 'REPO',
+      tag_name: 'v1.0.0',
+      target_commitish: 'master',
+      name: 'v1.0.0',
+      body: 'Description of the release',
+      draft: false,
+      prerelease: false,
+      generate_release_notes: false
     }
     core.info(`Creating GHCR package with payload:\n${JSON.stringify(payload, null, '\t')}`)
     const response = await axios.post(publishPackageEndpoint, payload, {
