@@ -1,10 +1,6 @@
 name: 'Package and Publish'
 description: 'Publish actions as OCI artifacts to GHCR'
 inputs:
-  milliseconds: # change this
-    required: true
-    description: 'input description here'
-    default: '10'
   token:
     required: true
     description: >
@@ -13,7 +9,7 @@ inputs:
   workdir:
     required: false
     description: The work directory to be tar archived and uploaded as OCI Artifact layer.
-    default: ./
+    default: '.'
   semver:
     required: true
     description: 'Release version'
