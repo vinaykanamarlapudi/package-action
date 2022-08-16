@@ -74,6 +74,30 @@ describe('create and publish', () => { //describe
       data: {
         package: "https://ghcr.io/monalisa/is-awesome:1.0.1"
       }
+
+      expect(axios.post).toBeCalledWith(
+        'http://api.github.localhost/repos/monalisa/is-awesome/actions/packages'
+  //       ,{
+  //         artifact_url: 'https://fake-artifact.com&%24expand=SignedContent',
+  //         pages_build_version: 'valid-build-version',
+  //         oidc_token: fakeJwt
+  //       },
+  //       {
+  //         headers: {
+  //           Accept: 'application/octet-stream',
+  //           Authorization: `Bearer gha-token`,
+  //           'Content-type': 'application/json'
+  //         }
+  //       }
+      )
+
+      expect(core.setFailed).not.toHaveBeenCalled()
+    expect(core.info).toHaveBeenCalledWith(
+      'Created GHCR package for semver(1.0.1) with package URL https://ghcr.io/monalisa/is-awesome:1.0.1'
+    )
+
+    scope.done()
+
     })
 
 
@@ -81,69 +105,46 @@ describe('create and publish', () => { //describe
 //     const deployment = new Deployment()
 //     await deployment.create(fakeJwt)
 
-    expect(axios.post).toBeCalledWith(
-      'http://api.github.localhost/repos/monalisa/is-awesome/actions/packages'
-//       ,{
-//         artifact_url: 'https://fake-artifact.com&%24expand=SignedContent',
-//         pages_build_version: 'valid-build-version',
-//         oidc_token: fakeJwt
-//       },
-//       {
-//         headers: {
-//           Accept: 'application/octet-stream',
-//           Authorization: `Bearer gha-token`,
-//           'Content-type': 'application/json'
-//         }
-//       }
-    )
+it('Reports errors with failed package', async () => {
+    //     process.env.GITHUB_SHA = 'invalid-build-version'
+    //     const scope = nock(`http://my-url`)
+    //       .get('/_apis/pipelines/workflows/123/artifacts?api-version=6.0-preview')
+    //       .reply(200, { value: [{ url: 'https://invalid-artifact.com', name: 'github-pages' }] })
+    
+        axios.post = jest.fn().mockRejectedValue({
+          status: 400
+        })
+    
+        // Create the deployment
+    //     const deployment = new Deployment()
+        try {
+    //       deployment.create()
+          console.log("Do something");
+        } catch (err) {
+    
+          expect(axios.post).toBeCalledWith(
+            'http://api.github.localhost/repos/monalisa/is-awesome/actions/packages'
+    //         ,{
+    //           artifact_url: 'https://invalid-artifact.com&%24expand=SignedContent',
+    //           pages_build_version: 'invalid-build-version'
+    //         },
+    //         {
+    //           headers: {
+    //             Accept: 'application/vnd.github.v3+json',
+    //             Authorization: 'Bearer ',
+    //             'Content-type': 'application/octet-stream'
+    //           }
+    //         }
+          )
+    
+    //       expect(core.info).toHaveBeenLastCalledWith(
+    //         'Failed to create deployment for invalid-build-version.'
+    //       )
+          expect(core.setFailed).toHaveBeenCalledWith({ status: 400 })
+    
+          scope.done()
+        }
+      })
 
-    expect(core.setFailed).not.toHaveBeenCalled()
-    expect(core.info).toHaveBeenCalledWith(
-      'Created GHCR package for semver(1.0.1) with package URL https://ghcr.io/monalisa/is-awesome:1.0.1'
-    )
-
-    scope.done()
+    
   })
-
-  it('Reports errors with failed package', async () => {
-//     process.env.GITHUB_SHA = 'invalid-build-version'
-//     const scope = nock(`http://my-url`)
-//       .get('/_apis/pipelines/workflows/123/artifacts?api-version=6.0-preview')
-//       .reply(200, { value: [{ url: 'https://invalid-artifact.com', name: 'github-pages' }] })
-
-    axios.post = jest.fn().mockRejectedValue({
-      status: 400
-    })
-
-    // Create the deployment
-//     const deployment = new Deployment()
-    try {
-//       deployment.create()
-      console.log("Do something");
-    } catch (err) {
-
-      expect(axios.post).toBeCalledWith(
-        'http://api.github.localhost/repos/monalisa/is-awesome/actions/packages'
-//         ,{
-//           artifact_url: 'https://invalid-artifact.com&%24expand=SignedContent',
-//           pages_build_version: 'invalid-build-version'
-//         },
-//         {
-//           headers: {
-//             Accept: 'application/vnd.github.v3+json',
-//             Authorization: 'Bearer ',
-//             'Content-type': 'application/octet-stream'
-//           }
-//         }
-      )
-
-//       expect(core.info).toHaveBeenLastCalledWith(
-//         'Failed to create deployment for invalid-build-version.'
-//       )
-      expect(core.setFailed).toHaveBeenCalledWith({ status: 400 })
-
-      scope.done()
-    }
-  })
-
-})
