@@ -17,6 +17,9 @@ export async function createTarBall(workdir: string): Promise<void> {
     console.log("Tar cmd done");
     console.log("Exec executing for ls down");
     exec.exec('ls');
+    exec.exec('cd archive.tar.gz');
+    core.info(`Next is ls into archive.tar.gz`);
+    exec.exec('ls');
   } catch (error) {
     if (error instanceof Error) core.setFailed(`Oops! Creation of tarball failed!`)
   }
