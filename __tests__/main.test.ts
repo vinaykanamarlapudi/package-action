@@ -1,17 +1,20 @@
+import * as core from '@actions/core';
+import axios from 'axios';
+jest.mock('axios');
 describe('create and publish', () => { //describe
   beforeAll(() => { //beforeAll
     process.env.GITHUB_REPOSITORY = 'monalisa/is-awesome'
     process.env.GITHUB_TOKEN = 'gha-token'
     process.env.GITHUB_ACTOR = 'monalisa'
-    jest.spyOn(core, 'getInput').mockImplementation(param => { //core, jest and param has any type
-      switch (param) {
-        case 'semver':
-          return '1.0.1'
-        case 'token':
-          return process.env.GITHUB_TOKEN
-        case 'workdir':
-          return '.'
-      }
+    
+    let inputs = {
+      'semver': '1.0.1',
+      'token': process.env.GITHUB_TOKEN,
+      'workdir': '.'
+    } as any;
+
+    jest.spyOn(core, 'getInput').mockImplementation((name: string) => {
+      return inputs[name]
     })
 
     jest.spyOn(core, 'setOutput').mockImplementation(param => { //core, jest and param has any type
