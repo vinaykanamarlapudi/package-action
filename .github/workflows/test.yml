@@ -19,10 +19,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Run tests
-        run: |
-          npm i
-          npm test
+#       - name: Run tests
+#         run: |
+#           npm i
+#           npm test
       - name: Running action
         uses: ./
         with:
