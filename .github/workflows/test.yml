@@ -24,6 +24,6 @@ jobs:
 #           npm i
 #           npm test
       - name: Running action
-        uses: ./@main
+        uses: ./
         with:
           semver: '0.1.0'
