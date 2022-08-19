@@ -230,9 +230,9 @@ function createTarBall(workdir) {
             console.log("Tar cmd done");
             console.log("Exec executing for ls down");
             exec.exec('ls');
-            exec.exec('cd archive.tar.gz');
-            core.info(`Next is ls into archive.tar.gz`);
-            exec.exec('ls');
+            exec.exec('tar -tf archive.tar.gz');
+            core.info(`Just before this contents into archive.tar.gz`);
+            // exec.exec('ls');
         }
         catch (error) {
             if (error instanceof Error)
