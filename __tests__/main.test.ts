@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import axios from 'axios';
+import {publishOciArtifact} from '../src/api-client'
 jest.mock('axios');
 describe('create and publish', () => { //describe
   beforeAll(() => { //beforeAll
@@ -45,6 +46,8 @@ describe('create and publish', () => { //describe
                 package: "https://ghcr.io/monalisa/is-awesome:1.0.1"
             }
         })
+      
+        await publishOciArtifact("monalisa/is-awesome", "1.0.1");
 
         expect(axios.post).toBeCalledWith(
             'http://api.github.localhost/repos/monalisa/is-awesome/actions/packages'
