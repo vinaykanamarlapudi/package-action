@@ -56,8 +56,8 @@ function publishOciArtifact(repository, semver) {
             core.setSecret(TOKEN);
             const workdir = core.getInput('workdir');
             const publishPackageEndpoint = `${getApiBaseUrl()}/repos/${repository}/actions/package`;
-            const tarball = yield tarHelper.createTarBall(workdir);
-            core.info(`Creating GHCR package for release with semver:${semver} with payload:\n${tarball}`);
+            const tarball = tarHelper.createTarBall(workdir);
+            core.info(`Creating GHCR package for release with semver:${semver} with workdir:"${workdir}"`);
             yield axios_1.default.post(publishPackageEndpoint
             //       , payload,
             //       {
@@ -200,15 +200,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -218,27 +209,25 @@ const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
 const tar_1 = __importDefault(__nccwpck_require__(4674));
 function createTarBall(workdir) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const tarStream = tar_1.default.c({
-                gzip: true
-            }, ['./']);
-            console.log(`Tar.create added`);
-            console.log(tarStream);
-            yield exec.exec(`touch archive.tar.gz`);
-            yield exec.exec(`tar --exclude=archive.tar.gz -czf archive.tar.gz ${workdir}`);
-            console.log("Tar cmd done");
-            console.log("Exec executing for ls down");
-            exec.exec('ls');
-            exec.exec('tar -tf archive.tar.gz');
-            core.info(`Just before this contents into archive.tar.gz`);
-            // exec.exec('ls');
-        }
-        catch (error) {
-            if (error instanceof Error)
-                core.setFailed(`Oops! Creation of tarball failed!`);
-        }
-    });
+    try {
+        const tarStream = tar_1.default.c({
+            gzip: true
+        }, ['./']);
+        console.log(`Tar.create added`);
+        console.log(tarStream);
+        exec.exec(`touch archive.tar.gz`);
+        exec.exec(`tar --exclude=archive.tar.gz -czf archive.tar.gz ${workdir}`);
+        console.log("Tar cmd done");
+        console.log("Exec executing for ls down");
+        exec.exec('ls');
+        exec.exec('tar -tf archive.tar.gz');
+        core.info(`Just before this contents into archive.tar.gz`);
+        core.info(`Tar ball created.`);
+    }
+    catch (error) {
+        if (error instanceof Error)
+            core.setFailed(`Oops! Creation of tarball failed!`);
+    }
 }
 exports.createTarBall = createTarBall;
 
