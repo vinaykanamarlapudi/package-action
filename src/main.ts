@@ -5,7 +5,7 @@ async function run(): Promise<void> {
   try {
     const repository: string = process!.env!.GITHUB_REPOSITORY || " ";
     if (repository === " "){
-      core.setFailed(`Oops! Could not found Repository!`);
+      core.setFailed(`Oops! Could not find Repository!`);
     }
     const semver: string = core.getInput('semver');
 
