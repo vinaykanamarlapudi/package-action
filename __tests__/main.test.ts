@@ -19,11 +19,11 @@ describe('create and publish', () => {
       return inputs[name]
     })
 
-    jest.spyOn(core, 'setOutput').mockImplementation(param => { //core, jest and param has any type
+    jest.spyOn(core, 'setOutput').mockImplementation(param => { 
       return param
     })
 
-    jest.spyOn(core, 'setFailed').mockImplementation(param => { //core, jest and param has any type
+    jest.spyOn(core, 'setFailed').mockImplementation(param => { 
       return param
     })
     // Mock error/warning/info/debug
