@@ -19,12 +19,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Run tests
-        run: |
-          npm i -D @types/jest
-          npm i --save-dev @types/tar
-          npm test
+#       - name: Run tests
+#         run: |
+#           npm i -D @types/jest
+#           npm i --save-dev @types/tar
+#           npm test
       - name: Running action
         uses: ./
         with:
+          token: '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'
           semver: '0.1.0'
