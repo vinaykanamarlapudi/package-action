@@ -64,12 +64,12 @@ function publishOciArtifact(repository, semver) {
             const publishPackageEndpoint = `${getApiBaseUrl()}/repos/${repository}/actions/package`;
             core.info(`Creating GHCR package for release with semver:${semver} with workdir:"${workdir}"`);
             const fileStream = fs.createReadStream('archive.tar.gz');
-            yield axios_1.default
-                .post(publishPackageEndpoint, fileStream, {
+            yield axios_1.default.post(publishPackageEndpoint, fileStream, {
                 headers: {
                     Accept: 'application/vnd.github.v3+json',
                     Authorization: `Bearer ${TOKEN}`,
-                    'Content-type': 'application/octet-stream'
+                    'Content-type': 'application/octet-stream',
+                    'tag': `${semver}`
                 }
             })
                 .then(response => {

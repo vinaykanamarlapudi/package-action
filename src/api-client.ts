@@ -29,15 +29,17 @@ export async function publishOciArtifact(
 
     const fileStream = fs.createReadStream('archive.tar.gz')
 
-    await axios
-      .post(publishPackageEndpoint, fileStream, {
+    await axios.post(publishPackageEndpoint,
+       fileStream, 
+       {
         headers: {
           Accept: 'application/vnd.github.v3+json',
           Authorization: `Bearer ${TOKEN}`,
           'Content-type': 'application/octet-stream',
-          'tag': ${semver}
+          'tag': `${semver}`
         }
-      })
+       }
+      )
       .then(response => {
         core.info(
           `Created GHCR package for semver(${semver}) with package URL ${response.data.package_url}`
