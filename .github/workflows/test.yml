@@ -27,5 +27,5 @@ jobs:
       - name: Running action
         uses: ./
         with:
-          token: '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'
+          token: ${{ secrets.PAT }}
           semver: '0.1.0'
