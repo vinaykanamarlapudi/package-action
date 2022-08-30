@@ -63,17 +63,8 @@ describe('create and publish', () => {
 
     await publishOciArtifact('monalisa/is-awesome', '1.0.1')
 
-    // expect(axios.post).toBeCalledWith(
-    //   'https://api.github.com/repos/monalisa/is-awesome/actions/package',
-    //   fileStream,
-    //   {
-    //     headers: {
-    //       Accept: 'application/vnd.github.v3+json',
-    //       Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-    //      'Content-type': 'application/octet-stream'
-    //      }
-    //   }
-    // )
+    expect(axios.post).toHaveBeenCalled()
+    expect(axios.post).toHaveBeenCalledTimes(1)
 
     expect(core.setFailed).not.toHaveBeenCalled()
     expect(core.info).toHaveBeenCalledWith(
