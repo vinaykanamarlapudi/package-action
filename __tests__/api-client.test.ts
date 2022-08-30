@@ -1,46 +1,46 @@
-import * as core from '@actions/core';
-import axios from 'axios';
-import * as fs from 'fs';
+import * as core from '@actions/core'
+import axios from 'axios'
+import * as fs from 'fs'
 import {getApiBaseUrl, publishOciArtifact} from '../src/api-client'
-jest.mock('axios');
+jest.mock('axios')
 
 describe('getApiBaseUrl returns', () => {
   test('returns environment variable when set correctly', () => {
     process.env.GITHUB_API_URL = 'https://api.github.com'
-    if(process.env.GITHUB_API_URL){
-      expect(getApiBaseUrl()).toEqual(process.env.GITHUB_API_URL);
+    if (process.env.GITHUB_API_URL) {
+      expect(getApiBaseUrl()).toEqual(process.env.GITHUB_API_URL)
     }
   })
   test('returns githubApiUrl when Env variable set incorrectly', () => {
     process.env.GITHUB_API_URL = ' '
-    expect(getApiBaseUrl()).toEqual('https://api.github.com');
+    expect(getApiBaseUrl()).toEqual('https://api.github.com')
   })
   test('returns githubApiUrl when Env variable not set', () => {
-    expect(getApiBaseUrl()).toEqual('https://api.github.com');
+    expect(getApiBaseUrl()).toEqual('https://api.github.com')
   })
 })
 
-describe('create and publish', () => { 
-  beforeAll(() => { 
+describe('create and publish', () => {
+  beforeAll(() => {
     process.env.GITHUB_REPOSITORY = 'monalisa/is-awesome'
     process.env.GITHUB_TOKEN = 'gha-token'
     process.env.GITHUB_ACTOR = 'monalisa'
-    
+
     let inputs = {
-      'semver': '1.0.1',
-      'token': process.env.GITHUB_TOKEN,
-      'workdir': '.'
-    } as any;
+      semver: '1.0.1',
+      token: process.env.GITHUB_TOKEN,
+      workdir: '.'
+    } as any
 
     jest.spyOn(core, 'getInput').mockImplementation((name: string) => {
       return inputs[name]
     })
 
-    jest.spyOn(core, 'setOutput').mockImplementation(param => { 
+    jest.spyOn(core, 'setOutput').mockImplementation(param => {
       return param
     })
 
-    jest.spyOn(core, 'setFailed').mockImplementation(param => { 
+    jest.spyOn(core, 'setFailed').mockImplementation(param => {
       return param
     })
     jest.spyOn(core, 'setFailed').mockImplementation(jest.fn())
@@ -51,62 +51,61 @@ describe('create and publish', () => {
     jest.spyOn(core, 'debug').mockImplementation(jest.fn())
   })
 
-  it('can successfully create a package', async () => { 
-      axios.post = jest.fn().mockResolvedValue({ 
-        status: 201,
-        data: {
-            package_url: "https://ghcr.io/monalisa/is-awesome:1.0.1"
-        }
-      })
+  it('can successfully create a package', async () => {
+    axios.post = jest.fn().mockResolvedValue({
+      status: 201,
+      data: {
+        package_url: 'https://ghcr.io/monalisa/is-awesome:1.0.1'
+      }
+    })
 
-      const fileStream = fs.createReadStream('archive.tar.gz');
-    
-      await publishOciArtifact("monalisa/is-awesome", "1.0.1");
+    const fileStream = fs.createReadStream('archive.tar.gz')
 
-      // expect(axios.post).toBeCalledWith(
-      //   'https://api.github.com/repos/monalisa/is-awesome/actions/package',
-      //   fileStream,
-      //   {
-      //     headers: {
-      //       Accept: 'application/vnd.github.v3+json',
-      //       Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-      //      'Content-type': 'application/octet-stream'
-      //      }
-      //   }
-      // )
+    await publishOciArtifact('monalisa/is-awesome', '1.0.1')
 
-      expect(core.setFailed).not.toHaveBeenCalled()
-      expect(core.info).toHaveBeenCalledWith(
-        'Created GHCR package for semver(1.0.1) with package URL https://ghcr.io/monalisa/is-awesome:1.0.1'
-      )
+    // expect(axios.post).toBeCalledWith(
+    //   'https://api.github.com/repos/monalisa/is-awesome/actions/package',
+    //   fileStream,
+    //   {
+    //     headers: {
+    //       Accept: 'application/vnd.github.v3+json',
+    //       Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+    //      'Content-type': 'application/octet-stream'
+    //      }
+    //   }
+    // )
+
+    expect(core.setFailed).not.toHaveBeenCalled()
+    expect(core.info).toHaveBeenCalledWith(
+      'Created GHCR package for semver(1.0.1) with package URL https://ghcr.io/monalisa/is-awesome:1.0.1'
+    )
   })
 
   it('Reports errors with response code 400', async () => {
     axios.post = jest.fn().mockRejectedValue({
-      status: 400, 
+      status: 400,
       message: `Error publishing actions packages for ${process.env.GITHUB_REPOSITORY}:1.0.1 on ghcr.io`
     })
-         
-    try {
-      await publishOciArtifact("monalisa/is-awesome", "1.0.1");
-    } catch (err) {
 
+    try {
+      await publishOciArtifact('monalisa/is-awesome', '1.0.1')
+    } catch (err) {
       expect(axios.post).toBeCalledWith(
         'https://api.github.com/repos/monalisa/is-awesome/actions/packages'
-  //         ,{
-  //           artifact_url: 'https://invalid-artifact.com&%24expand=SignedContent',
-  //           pages_build_version: 'invalid-build-version'
-  //         },
-  //         {
-  //           headers: {
-  //             Accept: 'application/vnd.github.v3+json',
-  //             Authorization: 'Bearer ',
-  //             'Content-type': 'application/octet-stream'
-  //           }
-  //         }
+        //         ,{
+        //           artifact_url: 'https://invalid-artifact.com&%24expand=SignedContent',
+        //           pages_build_version: 'invalid-build-version'
+        //         },
+        //         {
+        //           headers: {
+        //             Accept: 'application/vnd.github.v3+json',
+        //             Authorization: 'Bearer ',
+        //             'Content-type': 'application/octet-stream'
+        //           }
+        //         }
       )
 
-      expect(core.setFailed).toHaveBeenCalledWith({ status: 400 })
+      expect(core.setFailed).toHaveBeenCalledWith({status: 400})
       expect(core.setFailed).toHaveBeenCalledWith(
         `Failed to create package (status: 400) with semver 1.0.1. 
          Responded with: "Error publishing actions packages for ${process.env.GITHUB_REPOSITORY}:1.0.1 on ghcr.io"`
@@ -118,27 +117,26 @@ describe('create and publish', () => {
     axios.post = jest.fn().mockRejectedValue({
       status: 403
     })
-         
-    try {
-      await publishOciArtifact("monalisa/is-awesome", "1.0.1");
-    } catch (err) {
 
+    try {
+      await publishOciArtifact('monalisa/is-awesome', '1.0.1')
+    } catch (err) {
       expect(axios.post).toBeCalledWith(
         'https://api.github.com/repos/monalisa/is-awesome/actions/packages'
-  //         ,{
-  //           artifact_url: 'https://invalid-artifact.com&%24expand=SignedContent',
-  //           pages_build_version: 'invalid-build-version'
-  //         },
-  //         {
-  //           headers: {
-  //             Accept: 'application/vnd.github.v3+json',
-  //             Authorization: 'Bearer ',
-  //             'Content-type': 'application/octet-stream'
-  //           }
-  //         }
+        //         ,{
+        //           artifact_url: 'https://invalid-artifact.com&%24expand=SignedContent',
+        //           pages_build_version: 'invalid-build-version'
+        //         },
+        //         {
+        //           headers: {
+        //             Accept: 'application/vnd.github.v3+json',
+        //             Authorization: 'Bearer ',
+        //             'Content-type': 'application/octet-stream'
+        //           }
+        //         }
       )
 
-      expect(core.setFailed).toHaveBeenCalledWith({ status: 403 })
+      expect(core.setFailed).toHaveBeenCalledWith({status: 403})
       expect(core.setFailed).toHaveBeenCalledWith(
         `Failed to create package (status: 403) with semver 1.0.1. Ensure GITHUB_TOKEN has permission "packages: write".`
       )
@@ -150,27 +148,26 @@ describe('create and publish', () => {
       status: 404,
       message: 'GitHub Actions is not enabled'
     })
-         
-    try {
-      await publishOciArtifact("monalisa/is-awesome", "1.0.1");
-    } catch (err) {
 
+    try {
+      await publishOciArtifact('monalisa/is-awesome', '1.0.1')
+    } catch (err) {
       expect(axios.post).toBeCalledWith(
         'https://api.github.com/repos/monalisa/is-awesome/actions/packages'
-  //         ,{
-  //           artifact_url: 'https://invalid-artifact.com&%24expand=SignedContent',
-  //           pages_build_version: 'invalid-build-version'
-  //         },
-  //         {
-  //           headers: {
-  //             Accept: 'application/vnd.github.v3+json',
-  //             Authorization: 'Bearer ',
-  //             'Content-type': 'application/octet-stream'
-  //           }
-  //         }
+        //         ,{
+        //           artifact_url: 'https://invalid-artifact.com&%24expand=SignedContent',
+        //           pages_build_version: 'invalid-build-version'
+        //         },
+        //         {
+        //           headers: {
+        //             Accept: 'application/vnd.github.v3+json',
+        //             Authorization: 'Bearer ',
+        //             'Content-type': 'application/octet-stream'
+        //           }
+        //         }
       )
 
-      expect(core.setFailed).toHaveBeenCalledWith({ status: 404 })
+      expect(core.setFailed).toHaveBeenCalledWith({status: 404})
       expect(core.setFailed).toHaveBeenCalledWith(
         `Failed to create package (status: 404) with semver 1.0.1. Ensure GitHub Actions have been enabled. 
          Responded with: "GitHub Actions is not enabled"`
@@ -180,35 +177,33 @@ describe('create and publish', () => {
 
   it('Reports errors with response code 500', async () => {
     axios.post = jest.fn().mockRejectedValue({
-      status: 500, 
-      message:'Internal Server error'
+      status: 500,
+      message: 'Internal Server error'
     })
-         
-    try {
-      await publishOciArtifact("monalisa/is-awesome", "1.0.1");
-    } catch (err) {
 
+    try {
+      await publishOciArtifact('monalisa/is-awesome', '1.0.1')
+    } catch (err) {
       expect(axios.post).toBeCalledWith(
         'https://api.github.com/repos/monalisa/is-awesome/actions/packages'
-  //         ,{
-  //           artifact_url: 'https://invalid-artifact.com&%24expand=SignedContent',
-  //           pages_build_version: 'invalid-build-version'
-  //         },
-  //         {
-  //           headers: {
-  //             Accept: 'application/vnd.github.v3+json',
-  //             Authorization: 'Bearer ',
-  //             'Content-type': 'application/octet-stream'
-  //           }
-  //         }
+        //         ,{
+        //           artifact_url: 'https://invalid-artifact.com&%24expand=SignedContent',
+        //           pages_build_version: 'invalid-build-version'
+        //         },
+        //         {
+        //           headers: {
+        //             Accept: 'application/vnd.github.v3+json',
+        //             Authorization: 'Bearer ',
+        //             'Content-type': 'application/octet-stream'
+        //           }
+        //         }
       )
 
-      expect(core.setFailed).toHaveBeenCalledWith({ status: 500 })
+      expect(core.setFailed).toHaveBeenCalledWith({status: 500})
       expect(core.setFailed).toHaveBeenLastCalledWith(
         `Failed to create package (status: 500) with semver 1.0.1. Server error, is githubstatus.com reporting a GHCR outage? Please re-run the release at a later time. 
          Responded with: "Internal Server error"`
-      ) 
+      )
     }
   })
 })
-

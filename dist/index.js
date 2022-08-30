@@ -48,7 +48,8 @@ const axios_1 = __importDefault(__nccwpck_require__(6545));
 const fs = __importStar(__nccwpck_require__(7147));
 function getApiBaseUrl() {
     const githubApiUrl = 'https://api.github.com';
-    if (process.env.GITHUB_API_URL && process.env.GITHUB_API_URL === githubApiUrl) {
+    if (process.env.GITHUB_API_URL &&
+        process.env.GITHUB_API_URL === githubApiUrl) {
         return process.env.GITHUB_API_URL;
     }
     return githubApiUrl;
@@ -63,7 +64,8 @@ function publishOciArtifact(repository, semver) {
             const publishPackageEndpoint = `${getApiBaseUrl()}/repos/${repository}/actions/package`;
             core.info(`Creating GHCR package for release with semver:${semver} with workdir:"${workdir}"`);
             const fileStream = fs.createReadStream('archive.tar.gz');
-            yield axios_1.default.post(publishPackageEndpoint, fileStream, {
+            yield axios_1.default
+                .post(publishPackageEndpoint, fileStream, {
                 headers: {
                     Accept: 'application/vnd.github.v3+json',
                     Authorization: `Bearer ${TOKEN}`,
@@ -77,17 +79,17 @@ function publishOciArtifact(repository, semver) {
                 .catch(error => {
                 if (error.response) {
                     let errorMessage = `Failed to create package (status: ${error.response.status}) with semver ${semver}. `;
-                    let responseErrorMessage = "";
-                    if (error.response.status == 400) {
+                    let responseErrorMessage = '';
+                    if (error.response.status === 400) {
                         if (error.message) {
                             responseErrorMessage = error.message;
                             errorMessage += `\nResponded with: "${responseErrorMessage}"`;
                         }
                     }
-                    else if (error.response.status == 403) {
+                    else if (error.response.status === 403) {
                         errorMessage += `Ensure GITHUB_TOKEN has permission "packages: write". `;
                     }
-                    else if (error.response.status == 404) {
+                    else if (error.response.status === 404) {
                         errorMessage += `Ensure GitHub Actions have been enabled. `;
                         if (error.message) {
                             responseErrorMessage = error.message;
@@ -162,8 +164,8 @@ const tarHelper = __importStar(__nccwpck_require__(3368));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const repository = process.env.GITHUB_REPOSITORY || "";
-            if (repository === "") {
+            const repository = process.env.GITHUB_REPOSITORY || '';
+            if (repository === '') {
                 core.setFailed(`Could not find Repository!`);
             }
             const semver = core.getInput('semver');
