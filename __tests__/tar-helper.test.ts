@@ -14,21 +14,53 @@ describe('Tar create', () => {
       jest.spyOn(core, 'debug').mockImplementation(jest.fn())
     })
   
-      it('has successfully created a tar.gzip', () => { 
-          const workdir = '.'
-          fs.existsSync('./archive.tar.gz') == false;
-          const result = tarHelper.createTarBall(workdir);
-          fs.existsSync('./archive.tar.gz') == true;
-          expect(core.setFailed).not.toHaveBeenCalled()
-          expect(core.info).toHaveBeenCalledWith(
-            'Tar ball created.'
-          )
-      })
+    it('has successfully created a tar.gzip with default workdir input', async() => { 
+      let inputs = {
+        'workdir': '.'
+      } as any;
   
-      it('has not created a tar.gzip', () => { 
-        const workdir = '.'
+      jest.spyOn(core, 'getInput').mockImplementation((name: string) => {
+        return inputs[name]
+      })
+        const workdir = core.getInput('workdir');
         fs.existsSync('./archive.tar.gz') == false;
+        await tarHelper.createTarBall(workdir);
+        fs.existsSync('./archive.tar.gz') == true;
         expect(core.setFailed).not.toHaveBeenCalled()
-        expect(core.info).not.toHaveBeenCalled()
+        expect(core.info).toHaveBeenCalledWith(
+          'Tar ball created.'
+        )
+    }, 30000)
+
+    it('has successfully created a tar.gzip with custom workdir input', async() => { 
+      let inputs = {
+        'workdir': 'dist/ action.yml'
+      } as any;
+  
+      jest.spyOn(core, 'getInput').mockImplementation((name: string) => {
+        return inputs[name]
+      })
+        const workdir = core.getInput('workdir');
+        fs.existsSync('./archive.tar.gz') == false;
+        await tarHelper.createTarBall(workdir);
+        fs.existsSync('./archive.tar.gz') == true;
+        expect(core.setFailed).not.toHaveBeenCalled()
+        expect(core.info).toHaveBeenCalledWith(
+          'Tar ball created.'
+        )
+    }, 30000)
+  
+    it('has not created a tar.gzip with default workdir input', () => { 
+      const workdir = '.'
+      fs.existsSync('./archive.tar.gz') == false;
+      expect(core.setFailed).not.toHaveBeenCalled()
+      expect(core.info).not.toHaveBeenCalled()
+    })
+
+    it('has not created a tar.gzip with custom workdir input', () => { 
+      const workdir = 'dist/ action.yml'
+      fs.existsSync('./archive.tar.gz') == false;
+      expect(core.setFailed).not.toHaveBeenCalled()
+      expect(core.info).not.toHaveBeenCalled()
     })
   })
