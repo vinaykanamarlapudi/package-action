@@ -34,7 +34,8 @@ export async function publishOciArtifact(
         headers: {
           Accept: 'application/vnd.github.v3+json',
           Authorization: `Bearer ${TOKEN}`,
-          'Content-type': 'application/octet-stream'
+          'Content-type': 'application/octet-stream',
+          'tag': ${semver}
         }
       })
       .then(response => {
