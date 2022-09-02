@@ -6,9 +6,9 @@ inputs:
     description: >
       GITHUB_TOKEN having the write:package scope to publish an action package to GHCR.
     default: ${{ github.token }}
-  workdir:
+  path:
     required: false
-    description: The work directory to be tar archived and uploaded as OCI Artifact layer.
+    description: The work directory or path to be tar archived and uploaded as OCI Artifact layer.
     default: '.'
   semver:
     required: true

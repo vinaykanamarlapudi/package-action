@@ -9,9 +9,9 @@ async function run(): Promise<void> {
       core.setFailed(`Could not find Repository!`)
     }
     const semver: string = core.getInput('semver')
-    const workdir: string = core.getInput('workdir')
+    const path: string = core.getInput('path')
 
-    await tarHelper.createTarBall(workdir)
+    await tarHelper.createTarBall(path)
     await publishOciArtifact(repository, semver)
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)

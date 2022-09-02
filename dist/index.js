@@ -46,23 +46,21 @@ exports.publishOciArtifact = exports.getApiBaseUrl = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const axios_1 = __importDefault(__nccwpck_require__(6545));
 const fs = __importStar(__nccwpck_require__(7147));
+//returns the API Base Url
 function getApiBaseUrl() {
     const githubApiUrl = 'https://api.github.com';
-    if (process.env.GITHUB_API_URL &&
-        process.env.GITHUB_API_URL === githubApiUrl) {
-        return process.env.GITHUB_API_URL;
-    }
     return githubApiUrl;
 }
 exports.getApiBaseUrl = getApiBaseUrl;
+// Publish the Action Artifact to GHCR by calling the post API
 function publishOciArtifact(repository, semver) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const TOKEN = core.getInput('token');
             core.setSecret(TOKEN);
-            const workdir = core.getInput('workdir');
+            const path = core.getInput('path');
             const publishPackageEndpoint = `${getApiBaseUrl()}/repos/${repository}/actions/package`;
-            core.info(`Creating GHCR package for release with semver:${semver} with workdir:"${workdir}"`);
+            core.info(`Creating GHCR package for release with semver:${semver} with path:"${path}"`);
             const fileStream = fs.createReadStream('archive.tar.gz');
             yield axios_1.default.post(publishPackageEndpoint, fileStream, {
                 headers: {
@@ -74,40 +72,10 @@ function publishOciArtifact(repository, semver) {
             })
                 .then(response => {
                 core.info(`Created GHCR package for semver(${semver}) with package URL ${response.data.package_url}`);
-                core.setOutput('package-url', `https://ghcr.io/${repository}:${semver}`);
+                core.setOutput('package-url', `${response.data.package_url}`);
             })
                 .catch(error => {
-                if (error.response) {
-                    let errorMessage = `Failed to create package (status: ${error.response.status}) with semver ${semver}. `;
-                    let responseErrorMessage = '';
-                    if (error.response.status === 400) {
-                        if (error.message) {
-                            responseErrorMessage = error.message;
-                            errorMessage += `\nResponded with: "${responseErrorMessage}"`;
-                        }
-                    }
-                    else if (error.response.status === 403) {
-                        errorMessage += `Ensure GITHUB_TOKEN has permission "packages: write". `;
-                    }
-                    else if (error.response.status === 404) {
-                        errorMessage += `Ensure GitHub Actions have been enabled. `;
-                        if (error.message) {
-                            responseErrorMessage = error.message;
-                            errorMessage += `\nResponded with: "${responseErrorMessage}"`;
-                        }
-                    }
-                    else if (error.response.status >= 500) {
-                        errorMessage += `Server error, is githubstatus.com reporting a GHCR outage? Please re-run the release at a later time. `;
-                        if (error.message) {
-                            responseErrorMessage = error.message;
-                            errorMessage += `\nResponded with: "${responseErrorMessage}"`;
-                        }
-                    }
-                    core.setFailed(errorMessage);
-                }
-                else {
-                    throw error;
-                }
+                errorResponseHandling(error, semver);
             });
         }
         catch (error) {
@@ -116,6 +84,40 @@ function publishOciArtifact(repository, semver) {
     });
 }
 exports.publishOciArtifact = publishOciArtifact;
+// Respond with the appropriate error message based on response 
+function errorResponseHandling(error, semver) {
+    if (error.response) {
+        let errorMessage = `Failed to create package (status: ${error.response.status}) with semver ${semver}. `;
+        let responseErrorMessage = '';
+        if (error.response.status === 400) {
+            if (error.message) {
+                responseErrorMessage = error.message;
+                errorMessage += `\nResponded with: "${responseErrorMessage}"`;
+            }
+        }
+        else if (error.response.status === 403) {
+            errorMessage += `Ensure GITHUB_TOKEN has permission "packages: write". `;
+        }
+        else if (error.response.status === 404) {
+            errorMessage += `Ensure GitHub Actions have been enabled. `;
+            if (error.message) {
+                responseErrorMessage = error.message;
+                errorMessage += `\nResponded with: "${responseErrorMessage}"`;
+            }
+        }
+        else if (error.response.status >= 500) {
+            errorMessage += `Server error, is githubstatus.com reporting a GHCR outage? Please re-run the release at a later time. `;
+            if (error.message) {
+                responseErrorMessage = error.message;
+                errorMessage += `\nResponded with: "${responseErrorMessage}"`;
+            }
+        }
+        core.setFailed(errorMessage);
+    }
+    else {
+        throw error;
+    }
+}
 
 
 /***/ }),
@@ -169,8 +171,8 @@ function run() {
                 core.setFailed(`Could not find Repository!`);
             }
             const semver = core.getInput('semver');
-            const workdir = core.getInput('workdir');
-            yield tarHelper.createTarBall(workdir);
+            const path = core.getInput('path');
+            yield tarHelper.createTarBall(path);
             yield (0, api_client_1.publishOciArtifact)(repository, semver);
         }
         catch (error) {
@@ -222,23 +224,57 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.createTarBall = void 0;
+exports.isActionYamlPresentInPathSrc = exports.isValidPath = exports.createTarBall = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
-function createTarBall(workdir) {
+const fs = __importStar(__nccwpck_require__(7147));
+// Creates a tar.gzip of the inputs specified in path input or the entire contents
+function createTarBall(path) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             yield exec.exec(`touch archive.tar.gz`);
-            yield exec.exec(`tar --exclude=archive.tar.gz -czf archive.tar.gz ${workdir}`);
+            const pathArray = path.trim().split(/\s+/);
+            if (!isValidPath(pathArray)) {
+                throw new Error('Invalid path. Please ensure the path input has a valid path defined and separated by a space if you want multiple files/folders to be packaged.');
+            }
+            const actionFileWithExtension = fs.existsSync('action.yml') ? 'action.yml' : 'action.yaml';
+            const cmd = isActionYamlPresentInPathSrc(pathArray) ? `tar --exclude=archive.tar.gz -czf archive.tar.gz ${path}` : `tar --exclude=archive.tar.gz -czf archive.tar.gz ${path} ${actionFileWithExtension}`;
+            yield exec.exec(cmd);
             core.info(`Tar ball created.`);
         }
         catch (error) {
-            if (error instanceof Error)
-                core.setFailed(`Creation of tarball failed!`);
+            let errorMessage = `Creation of tarball failed! `;
+            if (error instanceof Error && error.message)
+                errorMessage += `${error.message}`;
+            core.setFailed(errorMessage);
         }
     });
 }
 exports.createTarBall = createTarBall;
+// Boolean function that returns whether the path given in path input is valid or not
+function isValidPath(pathArray) {
+    // Returns true only if every path is a valid path
+    return pathArray.every(filePath => {
+        return fs.existsSync(filePath);
+    });
+}
+exports.isValidPath = isValidPath;
+// Boolean function that determines whether action.y(a)ml is present in the path input or not
+function isActionYamlPresentInPathSrc(pathArray) {
+    if (pathArray.includes('action.yml') || pathArray.includes('action.yaml'))
+        return true;
+    // Transform the paths array to remove the traling '/' if it is present in the path input
+    pathArray = pathArray.map(e => {
+        if (e.endsWith('/'))
+            return e.slice(0, -1);
+        return e;
+    });
+    // Returns true as soon as action.y(a)ml is found in any of the paths in the provided path input
+    return pathArray.some(filePath => {
+        return fs.existsSync(`${filePath}/action.yml`) || fs.existsSync(`${filePath}/action.yaml`);
+    });
+}
+exports.isActionYamlPresentInPathSrc = isActionYamlPresentInPathSrc;
 
 
 /***/ }),

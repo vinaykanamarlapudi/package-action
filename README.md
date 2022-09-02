@@ -6,7 +6,7 @@
 
 This action packages your action repository as OCI artifacts and publishes it to [GHCR](ghcr.io), so your action can then be consumed as a package to make the actions ecosystem more secure.
 
-The whole action repository is packaged by default. Set `workdir` input to specify which path you want to package if you want only a few folders (for eg. dist) to be packaged.
+The whole action repository is packaged by default. Set `path` input to specify which path you want to package if you want only a few folders (for eg. dist) to be packaged.
 
 # Usage
 
@@ -31,7 +31,7 @@ The whole action repository is packaged by default. Set `workdir` input to speci
     # 
     # This defaults to the entire action repository contents if not explicitly defined.
     # Default: '.'
-    workdir: 'src/ action.yml dist/'
+    path: 'src/ action.yml dist/'
     
     # Semver compliant release version for the action release.
     # 
