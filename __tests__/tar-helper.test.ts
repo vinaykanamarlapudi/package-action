@@ -1,6 +1,10 @@
 import * as core from '@actions/core'
 import * as fs from 'fs'
-import {createTarBall, isActionYamlPresentInPathSrc, isValidPath} from '../src/tar-helper'
+import {
+  createTarBall,
+  isActionYamlPresentInPathSrc,
+  isValidPath
+} from '../src/tar-helper'
 
 describe('Tar create', () => {
   beforeAll(() => {
@@ -60,7 +64,7 @@ describe('Tar create', () => {
     expect(core.info).not.toHaveBeenCalled()
   })
 
-  it('throws Error with invalid path input', async() => {
+  it('throws Error with invalid path input', async () => {
     let inputs = {
       path: 'disty/ action.yaml'
     } as any
@@ -69,9 +73,9 @@ describe('Tar create', () => {
       return inputs[name]
     })
     const path = core.getInput('path')
-  
+
     await createTarBall(path)
-    
+
     expect(core.setFailed).toHaveBeenCalledWith(
       'Creation of tarball failed! Invalid path. Please ensure the path input has a valid path defined and separated by a space if you want multiple files/folders to be packaged.'
     )
@@ -82,29 +86,29 @@ describe('Tar create', () => {
 describe('Tar creation path isValidPath', () => {
   it('is a valid custom pathname', () => {
     const path = ['dist/', 'action.yml']
-    expect(isValidPath(path)).toBeTruthy();
+    expect(isValidPath(path)).toBeTruthy()
   })
   it('is a valid custom pathname', () => {
     const path = ['.']
-    expect(isValidPath(path)).toBeTruthy();
+    expect(isValidPath(path)).toBeTruthy()
   })
-  it('is an invalid custom pathname', () => { 
+  it('is an invalid custom pathname', () => {
     const path = ['distyy']
-    expect(isValidPath(path)).toBeFalsy();
+    expect(isValidPath(path)).toBeFalsy()
   })
 })
 
 describe('isActionYamlPresentInPathSrc returns', () => {
   it('true if action yml is present in src', () => {
     const path = ['dist', 'action.yml']
-    expect(isActionYamlPresentInPathSrc(path)).toBeTruthy();
+    expect(isActionYamlPresentInPathSrc(path)).toBeTruthy()
   })
   it('true if action yml is present in src', () => {
     const path = ['.']
-    expect(isActionYamlPresentInPathSrc(path)).toBeTruthy();
+    expect(isActionYamlPresentInPathSrc(path)).toBeTruthy()
   })
   it('false if action yml is not present in src', () => {
     const path = ['src']
-    expect(isActionYamlPresentInPathSrc(path)).toBeFalsy();
+    expect(isActionYamlPresentInPathSrc(path)).toBeFalsy()
   })
 })

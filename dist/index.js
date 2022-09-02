@@ -62,12 +62,13 @@ function publishOciArtifact(repository, semver) {
             const publishPackageEndpoint = `${getApiBaseUrl()}/repos/${repository}/actions/package`;
             core.info(`Creating GHCR package for release with semver:${semver} with path:"${path}"`);
             const fileStream = fs.createReadStream('archive.tar.gz');
-            yield axios_1.default.post(publishPackageEndpoint, fileStream, {
+            yield axios_1.default
+                .post(publishPackageEndpoint, fileStream, {
                 headers: {
                     Accept: 'application/vnd.github.v3+json',
                     Authorization: `Bearer ${TOKEN}`,
                     'Content-type': 'application/octet-stream',
-                    'tag': `${semver}`
+                    tag: `${semver}`
                 }
             })
                 .then(response => {
@@ -84,7 +85,7 @@ function publishOciArtifact(repository, semver) {
     });
 }
 exports.publishOciArtifact = publishOciArtifact;
-// Respond with the appropriate error message based on response 
+// Respond with the appropriate error message based on response
 function errorResponseHandling(error, semver) {
     if (error.response) {
         let errorMessage = `Failed to create package (status: ${error.response.status}) with semver ${semver}. `;
@@ -237,8 +238,12 @@ function createTarBall(path) {
             if (!isValidPath(pathArray)) {
                 throw new Error('Invalid path. Please ensure the path input has a valid path defined and separated by a space if you want multiple files/folders to be packaged.');
             }
-            const actionFileWithExtension = fs.existsSync('action.yml') ? 'action.yml' : 'action.yaml';
-            const cmd = isActionYamlPresentInPathSrc(pathArray) ? `tar --exclude=archive.tar.gz -czf archive.tar.gz ${path}` : `tar --exclude=archive.tar.gz -czf archive.tar.gz ${path} ${actionFileWithExtension}`;
+            const actionFileWithExtension = fs.existsSync('action.yml')
+                ? 'action.yml'
+                : 'action.yaml';
+            const cmd = isActionYamlPresentInPathSrc(pathArray)
+                ? `tar --exclude=archive.tar.gz -czf archive.tar.gz ${path}`
+                : `tar --exclude=archive.tar.gz -czf archive.tar.gz ${path} ${actionFileWithExtension}`;
             yield exec.exec(cmd);
             core.info(`Tar ball created.`);
         }
@@ -271,7 +276,8 @@ function isActionYamlPresentInPathSrc(pathArray) {
     });
     // Returns true as soon as action.y(a)ml is found in any of the paths in the provided path input
     return pathArray.some(filePath => {
-        return fs.existsSync(`${filePath}/action.yml`) || fs.existsSync(`${filePath}/action.yaml`);
+        return (fs.existsSync(`${filePath}/action.yml`) ||
+            fs.existsSync(`${filePath}/action.yaml`));
     });
 }
 exports.isActionYamlPresentInPathSrc = isActionYamlPresentInPathSrc;

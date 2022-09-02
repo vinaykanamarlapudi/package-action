@@ -2,7 +2,6 @@ import * as core from '@actions/core'
 import axios from 'axios'
 import * as fs from 'fs'
 
-
 //returns the API Base Url
 export function getApiBaseUrl(): string {
   const githubApiUrl = 'https://api.github.com'
@@ -20,27 +19,30 @@ export async function publishOciArtifact(
     const path: string = core.getInput('path')
     const publishPackageEndpoint = `${getApiBaseUrl()}/repos/${repository}/actions/package`
 
-    core.info(`Creating GHCR package for release with semver:${semver} with path:"${path}"`)
+    core.info(
+      `Creating GHCR package for release with semver:${semver} with path:"${path}"`
+    )
 
     const fileStream = fs.createReadStream('archive.tar.gz')
 
-    await axios.post(publishPackageEndpoint,
-      fileStream, 
-      {
+    await axios
+      .post(publishPackageEndpoint, fileStream, {
         headers: {
           Accept: 'application/vnd.github.v3+json',
           Authorization: `Bearer ${TOKEN}`,
           'Content-type': 'application/octet-stream',
-          'tag': `${semver}`
+          tag: `${semver}`
         }
       })
-    .then(response => {
-      core.info(`Created GHCR package for semver(${semver}) with package URL ${response.data.package_url}`)
-      core.setOutput('package-url', `${response.data.package_url}`)
-    })
-    .catch(error => {
-      errorResponseHandling(error, semver);
-    })
+      .then(response => {
+        core.info(
+          `Created GHCR package for semver(${semver}) with package URL ${response.data.package_url}`
+        )
+        core.setOutput('package-url', `${response.data.package_url}`)
+      })
+      .catch(error => {
+        errorResponseHandling(error, semver)
+      })
   } catch (error) {
     core.setFailed(
       `An unexpected error occured with error:\n${JSON.stringify(error)}`
@@ -48,8 +50,8 @@ export async function publishOciArtifact(
   }
 }
 
-// Respond with the appropriate error message based on response 
-function errorResponseHandling(error: any, semver: string){
+// Respond with the appropriate error message based on response
+function errorResponseHandling(error: any, semver: string): void {
   if (error.response) {
     let errorMessage = `Failed to create package (status: ${error.response.status}) with semver ${semver}. `
     let responseErrorMessage = ''
