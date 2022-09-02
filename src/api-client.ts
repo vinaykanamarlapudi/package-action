@@ -25,28 +25,21 @@ export async function publishOciArtifact(
 
     const fileStream = fs.createReadStream('archive.tar.gz')
 
-    await axios
-      .post(publishPackageEndpoint, fileStream, {
-        headers: {
-          Accept: 'application/vnd.github.v3+json',
-          Authorization: `Bearer ${TOKEN}`,
-          'Content-type': 'application/octet-stream',
-          tag: `${semver}`
-        }
-      })
-      .then(response => {
-        core.info(
-          `Created GHCR package for semver(${semver}) with package URL ${response.data.package_url}`
-        )
-        core.setOutput('package-url', `${response.data.package_url}`)
-      })
-      .catch(error => {
-        errorResponseHandling(error, semver)
-      })
-  } catch (error) {
-    core.setFailed(
-      `An unexpected error occured with error:\n${JSON.stringify(error)}`
+    const response = await axios.post(publishPackageEndpoint, fileStream, {
+      headers: {
+        Accept: 'application/vnd.github.v3+json',
+        Authorization: `Bearer ${TOKEN}`,
+        'Content-type': 'application/octet-stream',
+        tag: `${semver}`
+      }
+    })
+
+    core.info(
+      `Created GHCR package for semver(${semver}) with package URL ${response.data.package_url}`
     )
+    core.setOutput('package-url', `${response.data.package_url}`)
+  } catch (error) {
+    errorResponseHandling(error, semver)
   }
 }
 
@@ -77,6 +70,8 @@ function errorResponseHandling(error: any, semver: string): void {
     }
     core.setFailed(errorMessage)
   } else {
-    throw error
+    core.setFailed(
+      `An unexpected error occured with error:\n${JSON.stringify(error)}`
+    )
   }
 }
