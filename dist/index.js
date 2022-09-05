@@ -61,7 +61,8 @@ function publishOciArtifact(repository, semver) {
             const path = core.getInput('path');
             const publishPackageEndpoint = `${getApiBaseUrl()}/repos/${repository}/actions/package`;
             core.info(`Creating GHCR package for release with semver:${semver} with path:"${path}"`);
-            const fileStream = fs.createReadStream('archive.tar.gz');
+            const tempDir = './tmp';
+            const fileStream = fs.createReadStream(`${tempDir}/archive.tar.gz`);
             const response = yield axios_1.default.post(publishPackageEndpoint, fileStream, {
                 headers: {
                     Accept: 'application/vnd.github.v3+json',
@@ -106,7 +107,7 @@ function errorResponseHandling(error, semver) {
         core.setFailed(errorMessage);
     }
     else {
-        core.setFailed(`An unexpected error occured with error:\n${JSON.stringify(error)}`);
+        core.setFailed(`An unexpected error occured with error:\n${error}`);
     }
 }
 
@@ -236,8 +237,8 @@ function createTarBall(path) {
                 ? 'action.yml'
                 : 'action.yaml';
             const cmd = isActionYamlPresentInPathSrc(pathArray)
-                ? `tar -czf ${tempDir}/archive.tar.gz ${path}`
-                : `tar -czf ${tempDir}/archive.tar.gz ${path} ${actionFileWithExtension}`;
+                ? `tar --exclude=${tempDir}/archive.tar.gz -czf ${tempDir}/archive.tar.gz ${path}`
+                : `tar --exclude=${tempDir}/archive.tar.gz -czf ${tempDir}/archive.tar.gz ${path} ${actionFileWithExtension}`;
             yield exec.exec(cmd);
             core.info(`Tar ball created.`);
         }
