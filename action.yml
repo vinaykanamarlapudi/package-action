@@ -20,4 +20,4 @@ outputs:
 runs:
   using: 'node16'
   main: 'dist/index.js'
-  post: 'lib/cleanup/cleanup.js'
+  post: 'src/cleanup/cleanup.ts'
