@@ -47,25 +47,21 @@ export async function publishOciArtifact(
 function errorResponseHandling(error: any, semver: string): void {
   if (error.response) {
     let errorMessage = `Failed to create package (status: ${error.response.status}) with semver ${semver}. `
-    let responseErrorMessage = ''
     if (error.response.status === 400) {
       if (error.message) {
-        responseErrorMessage = error.message
-        errorMessage += `\nResponded with: "${responseErrorMessage}"`
+        errorMessage += `\nResponded with: "${error.message}"`
       }
     } else if (error.response.status === 403) {
       errorMessage += `Ensure GITHUB_TOKEN has permission "packages: write". `
     } else if (error.response.status === 404) {
       errorMessage += `Ensure GitHub Actions have been enabled. `
       if (error.message) {
-        responseErrorMessage = error.message
-        errorMessage += `\nResponded with: "${responseErrorMessage}"`
+        errorMessage += `\nResponded with: "${error.message}"`
       }
     } else if (error.response.status >= 500) {
       errorMessage += `Server error, is githubstatus.com reporting a GHCR outage? Please re-run the release at a later time. `
       if (error.message) {
-        responseErrorMessage = error.message
-        errorMessage += `\nResponded with: "${responseErrorMessage}"`
+        errorMessage += `\nResponded with: "${error.message}"`
       }
     }
     core.setFailed(errorMessage)

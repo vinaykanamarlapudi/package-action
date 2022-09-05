@@ -5,7 +5,12 @@ import * as fs from 'fs'
 // Creates a tar.gzip of the inputs specified in path input or the entire contents
 export async function createTarBall(path: string): Promise<void> {
   try {
-    await exec.exec(`touch archive.tar.gz`)
+    const tempDir = './tmp';
+    if (!fs.existsSync(tempDir)){
+        fs.mkdirSync(tempDir);
+    }
+
+    await exec.exec(`touch ${tempDir}/archive.tar.gz`)
     const pathArray: string[] = path.trim().split(/\s+/)
     if (!isValidPath(pathArray)) {
       throw new Error(
@@ -16,8 +21,8 @@ export async function createTarBall(path: string): Promise<void> {
       ? 'action.yml'
       : 'action.yaml'
     const cmd = isActionYamlPresentInPathSrc(pathArray)
-      ? `tar --exclude=archive.tar.gz -czf archive.tar.gz ${path}`
-      : `tar --exclude=archive.tar.gz -czf archive.tar.gz ${path} ${actionFileWithExtension}`
+      ? `tar --exclude=${tempDir}/archive.tar.gz -czf ${tempDir}/archive.tar.gz ${path}`
+      : `tar --exclude=${tempDir}/archive.tar.gz -czf ${tempDir}/archive.tar.gz ${path} ${actionFileWithExtension}`
     await exec.exec(cmd)
     core.info(`Tar ball created.`)
   } catch (error) {

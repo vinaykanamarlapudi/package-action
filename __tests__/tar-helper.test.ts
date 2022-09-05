@@ -7,6 +7,8 @@ import {
 } from '../src/tar-helper'
 
 describe('Tar create', () => {
+  const timeoutMs: number = 35000;
+  const tempDir = './tmp';
   beforeAll(() => {
     jest.spyOn(core, 'setFailed').mockImplementation(param => {
       return param
@@ -27,12 +29,12 @@ describe('Tar create', () => {
       return inputs[name]
     })
     const path = core.getInput('path')
-    fs.existsSync('./archive.tar.gz') == false
+    fs.existsSync(`${tempDir}/archive.tar.gz`) == false
     await createTarBall(path)
-    fs.existsSync('./archive.tar.gz') == true
+    fs.existsSync(`${tempDir}/archive.tar.gz`) == true
     expect(core.setFailed).not.toHaveBeenCalled()
     expect(core.info).toHaveBeenCalledWith('Tar ball created.')
-  }, 35000)
+  }, timeoutMs)
 
   it('has successfully created a tar.gzip with custom path input', async () => {
     let inputs = {
@@ -43,23 +45,23 @@ describe('Tar create', () => {
       return inputs[name]
     })
     const path = core.getInput('path')
-    fs.existsSync('./archive.tar.gz') == false
+    fs.existsSync(`${tempDir}/archive.tar.gz`) == false
     await createTarBall(path)
-    fs.existsSync('./archive.tar.gz') == true
+    fs.existsSync(`${tempDir}/archive.tar.gz`) == true
     expect(core.setFailed).not.toHaveBeenCalled()
     expect(core.info).toHaveBeenCalledWith('Tar ball created.')
-  }, 30000)
+  }, timeoutMs)
 
   it('has not created a tar.gzip with default path input', () => {
     const path = '.'
-    fs.existsSync('./archive.tar.gz') == false
+    fs.existsSync(`${tempDir}/archive.tar.gz`) == false
     expect(core.setFailed).not.toHaveBeenCalled()
     expect(core.info).not.toHaveBeenCalled()
   })
 
   it('has not created a tar.gzip with custom path input', () => {
     const path = 'dist/ action.yml'
-    fs.existsSync('./archive.tar.gz') == false
+    fs.existsSync(`${tempDir}/archive.tar.gz`) == false
     expect(core.setFailed).not.toHaveBeenCalled()
     expect(core.info).not.toHaveBeenCalled()
   })
@@ -80,7 +82,7 @@ describe('Tar create', () => {
       'Creation of tarball failed! Invalid path. Please ensure the path input has a valid path defined and separated by a space if you want multiple files/folders to be packaged.'
     )
     expect(core.info).not.toHaveBeenCalled()
-  }, 30000)
+  }, timeoutMs)
 })
 
 describe('Tar creation path isValidPath', () => {

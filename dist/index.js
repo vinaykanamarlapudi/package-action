@@ -83,11 +83,9 @@ exports.publishOciArtifact = publishOciArtifact;
 function errorResponseHandling(error, semver) {
     if (error.response) {
         let errorMessage = `Failed to create package (status: ${error.response.status}) with semver ${semver}. `;
-        let responseErrorMessage = '';
         if (error.response.status === 400) {
             if (error.message) {
-                responseErrorMessage = error.message;
-                errorMessage += `\nResponded with: "${responseErrorMessage}"`;
+                errorMessage += `\nResponded with: "${error.message}"`;
             }
         }
         else if (error.response.status === 403) {
@@ -96,15 +94,13 @@ function errorResponseHandling(error, semver) {
         else if (error.response.status === 404) {
             errorMessage += `Ensure GitHub Actions have been enabled. `;
             if (error.message) {
-                responseErrorMessage = error.message;
-                errorMessage += `\nResponded with: "${responseErrorMessage}"`;
+                errorMessage += `\nResponded with: "${error.message}"`;
             }
         }
         else if (error.response.status >= 500) {
             errorMessage += `Server error, is githubstatus.com reporting a GHCR outage? Please re-run the release at a later time. `;
             if (error.message) {
-                responseErrorMessage = error.message;
-                errorMessage += `\nResponded with: "${responseErrorMessage}"`;
+                errorMessage += `\nResponded with: "${error.message}"`;
             }
         }
         core.setFailed(errorMessage);
@@ -227,7 +223,11 @@ const fs = __importStar(__nccwpck_require__(7147));
 function createTarBall(path) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield exec.exec(`touch archive.tar.gz`);
+            const tempDir = './tmp';
+            if (!fs.existsSync(tempDir)) {
+                fs.mkdirSync(tempDir);
+            }
+            yield exec.exec(`touch ${tempDir}/archive.tar.gz`);
             const pathArray = path.trim().split(/\s+/);
             if (!isValidPath(pathArray)) {
                 throw new Error('Invalid path. Please ensure the path input has a valid path defined and separated by a space if you want multiple files/folders to be packaged.');
@@ -236,8 +236,8 @@ function createTarBall(path) {
                 ? 'action.yml'
                 : 'action.yaml';
             const cmd = isActionYamlPresentInPathSrc(pathArray)
-                ? `tar --exclude=archive.tar.gz -czf archive.tar.gz ${path}`
-                : `tar --exclude=archive.tar.gz -czf archive.tar.gz ${path} ${actionFileWithExtension}`;
+                ? `tar -czf ${tempDir}/archive.tar.gz ${path}`
+                : `tar -czf ${tempDir}/archive.tar.gz ${path} ${actionFileWithExtension}`;
             yield exec.exec(cmd);
             core.info(`Tar ball created.`);
         }
