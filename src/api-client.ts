@@ -22,8 +22,8 @@ export async function publishOciArtifact(
     core.info(
       `Creating GHCR package for release with semver:${semver} with path:"${path}"`
     )
-
-    const fileStream = fs.createReadStream('archive.tar.gz')
+    const tempDir = './tmp'
+    const fileStream = fs.createReadStream(`${tempDir}/archive.tar.gz`)
 
     const response = await axios.post(publishPackageEndpoint, fileStream, {
       headers: {
@@ -67,7 +67,7 @@ function errorResponseHandling(error: any, semver: string): void {
     core.setFailed(errorMessage)
   } else {
     core.setFailed(
-      `An unexpected error occured with error:\n${JSON.stringify(error)}`
+      `An unexpected error occured with error:\n${error}`
     )
   }
 }
