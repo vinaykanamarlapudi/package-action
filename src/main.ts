@@ -14,6 +14,7 @@ async function run(): Promise<void> {
       core.setFailed('Please ensure you have the workflow trigger as release.')
       return
     }
+    console.log(`Github context:\n ${github.context}`);
     const semver: string = core.getInput('semver')
     const path: string = core.getInput('path')
 
