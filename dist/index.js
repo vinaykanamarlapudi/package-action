@@ -168,7 +168,7 @@ function run() {
                 core.setFailed('Please ensure you have the workflow trigger as release.');
                 return;
             }
-            console.log(`Github context:\n ${github.context}`);
+            console.log(`Github context:\n ${JSON.stringify(github.context)}`);
             const semver = core.getInput('semver');
             const path = core.getInput('path');
             yield tarHelper.createTarBall(path);
