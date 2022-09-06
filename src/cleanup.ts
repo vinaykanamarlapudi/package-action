@@ -15,7 +15,7 @@ function removeTarArchive(): void {
     fs.unlinkSync(path)
     core.info(`Action archive cleanup done!`)
   } catch (err) {
-     core.info(`Cleanup job failed to complete with error: ${err}`);
+    core.info(`Cleanup job failed to complete with error: ${err}`)
   }
 }
 run()
