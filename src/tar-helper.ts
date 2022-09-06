@@ -5,9 +5,9 @@ import * as fs from 'fs'
 // Creates a tar.gzip of the inputs specified in path input or the entire contents
 export async function createTarBall(path: string): Promise<void> {
   try {
-    const tempDir = './tmp';
-    if (!fs.existsSync(tempDir)){
-        fs.mkdirSync(tempDir);
+    const tempDir = './tmp'
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir)
     }
 
     await exec.exec(`touch ${tempDir}/archive.tar.gz`)

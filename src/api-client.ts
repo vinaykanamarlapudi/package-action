@@ -66,8 +66,6 @@ function errorResponseHandling(error: any, semver: string): void {
     }
     core.setFailed(errorMessage)
   } else {
-    core.setFailed(
-      `An unexpected error occured with error:\n${error}`
-    )
+    core.setFailed(`An unexpected error occured with error:\n${JSON.stringify(error)}`)
   }
 }

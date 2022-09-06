@@ -59,8 +59,6 @@ describe('create and publish', () => {
       }
     })
 
-    const fileStream = fs.createReadStream('archive.tar.gz')
-
     await publishOciArtifact('monalisa/is-awesome', '1.0.1')
 
     expect(axios.post).toHaveBeenCalled()
