@@ -61,7 +61,7 @@ function publishOciArtifact(repository, semver) {
             const path = core.getInput('path');
             const publishPackageEndpoint = `${getApiBaseUrl()}/repos/${repository}/actions/package`;
             core.info(`Creating GHCR package for release with semver:${semver} with path:"${path}"`);
-            const tempDir = './tmp';
+            const tempDir = '/tmp';
             const fileStream = fs.createReadStream(`${tempDir}/archive.tar.gz`);
             const response = yield axios_1.default.post(publishPackageEndpoint, fileStream, {
                 headers: {
@@ -168,8 +168,7 @@ function run() {
                 core.setFailed('Please ensure you have the workflow trigger as release.');
                 return;
             }
-            console.log(`Github context:\n ${JSON.stringify(github.context)}`);
-            const semver = core.getInput('semver');
+            const semver = github.context.payload.release.tag_name;
             const path = core.getInput('path');
             yield tarHelper.createTarBall(path);
             yield (0, api_client_1.publishOciArtifact)(repository, semver);
@@ -231,7 +230,7 @@ const fs = __importStar(__nccwpck_require__(7147));
 function createTarBall(path) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const tempDir = './tmp';
+            const tempDir = '/tmp';
             if (!fs.existsSync(tempDir)) {
                 fs.mkdirSync(tempDir);
             }
@@ -244,8 +243,8 @@ function createTarBall(path) {
                 ? 'action.yml'
                 : 'action.yaml';
             const cmd = isActionYamlPresentInPathSrc(pathArray)
-                ? `tar --exclude=${tempDir}/archive.tar.gz -czf ${tempDir}/archive.tar.gz ${path}`
-                : `tar --exclude=${tempDir}/archive.tar.gz -czf ${tempDir}/archive.tar.gz ${path} ${actionFileWithExtension}`;
+                ? `tar -czf ${tempDir}/archive.tar.gz ${path}`
+                : `tar -czf ${tempDir}/archive.tar.gz ${path} ${actionFileWithExtension}`;
             yield exec.exec(cmd);
             core.info(`Tar ball created.`);
         }

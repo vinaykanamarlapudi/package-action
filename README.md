@@ -32,12 +32,6 @@ The whole action repository is packaged by default. Set `path` input to specify 
     # This defaults to the entire action repository contents if not explicitly defined.
     # Default: '.'
     path: 'src/ action.yml dist/'
-    
-    # Semver compliant release version for the action release.
-    # 
-    # This defaults to the semver tag created during the release event.
-    # Default: ${{ github.event.release.tag_name }}
-    semver: '1.0.1'
 
     
 ```
