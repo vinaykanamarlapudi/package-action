@@ -3,7 +3,7 @@ import * as exec from '@actions/exec'
 import * as fs from 'fs'
 
 // Creates a tar.gzip of the inputs specified in path input or the entire contents
-export async function createTarBall(path: string): Promise<void> {
+export async function createTarBall(path: string): Promise<boolean> {
   try {
     const tempDir = '/tmp'
     if (!fs.existsSync(tempDir)) {
@@ -25,11 +25,13 @@ export async function createTarBall(path: string): Promise<void> {
       : `tar -czf ${tempDir}/archive.tar.gz ${path} ${actionFileWithExtension}`
     await exec.exec(cmd)
     core.info(`Tar ball created.`)
+    return true
   } catch (error) {
     let errorMessage = `Creation of tarball failed! `
     if (error instanceof Error && error.message)
       errorMessage += `${error.message}`
     core.setFailed(errorMessage)
+    return false
   }
 }
 

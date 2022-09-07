@@ -32,7 +32,8 @@ describe('Tar create', () => {
       })
       const path = core.getInput('path')
       fs.existsSync(`${tempDir}/archive.tar.gz`) == false
-      await createTarBall(path)
+      const tarBallCreated = await createTarBall(path)
+      expect(tarBallCreated).toBe(true)
       fs.existsSync(`${tempDir}/archive.tar.gz`) == true
       expect(core.setFailed).not.toHaveBeenCalled()
       expect(core.info).toHaveBeenCalledWith('Tar ball created.')
@@ -52,7 +53,8 @@ describe('Tar create', () => {
       })
       const path = core.getInput('path')
       fs.existsSync(`${tempDir}/archive.tar.gz`) == false
-      await createTarBall(path)
+      const tarBallCreated = await createTarBall(path)
+      expect(tarBallCreated).toBe(true)
       fs.existsSync(`${tempDir}/archive.tar.gz`) == true
       expect(core.setFailed).not.toHaveBeenCalled()
       expect(core.info).toHaveBeenCalledWith('Tar ball created.')
@@ -86,7 +88,8 @@ describe('Tar create', () => {
       })
       const path = core.getInput('path')
 
-      await createTarBall(path)
+      const tarBallCreated = await createTarBall(path)
+      expect(tarBallCreated).toBe(false)
 
       expect(core.setFailed).toHaveBeenCalledWith(
         'Creation of tarball failed! Invalid path. Please ensure the path input has a valid path defined and separated by a space if you want multiple files/folders to be packaged.'

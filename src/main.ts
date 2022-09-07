@@ -1,9 +1,9 @@
 import * as core from '@actions/core'
-import {publishOciArtifact} from './api-client'
+import * as apiClient from './api-client'
 import * as tarHelper from './tar-helper'
 import * as github from '@actions/github'
 
-async function run(): Promise<void> {
+export async function run(): Promise<void> {
   try {
     const repository: string = process.env.GITHUB_REPOSITORY || ''
     if (repository === '') {
@@ -15,11 +15,13 @@ async function run(): Promise<void> {
       return
     }
 
-    const semver: string = github.context.payload.release.tag_name
     const path: string = core.getInput('path')
+    const tarBallCreated = await tarHelper.createTarBall(path)
+    const semver: string = github.context.payload.release.tag_name
 
-    await tarHelper.createTarBall(path)
-    await publishOciArtifact(repository, semver)
+    if (tarBallCreated) {
+      await apiClient.publishOciArtifact(repository, semver)
+    }
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }

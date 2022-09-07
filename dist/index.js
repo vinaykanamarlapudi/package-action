@@ -152,8 +152,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.run = void 0;
 const core = __importStar(__nccwpck_require__(2186));
-const api_client_1 = __nccwpck_require__(5883);
+const apiClient = __importStar(__nccwpck_require__(5883));
 const tarHelper = __importStar(__nccwpck_require__(3368));
 const github = __importStar(__nccwpck_require__(5438));
 function run() {
@@ -168,10 +169,12 @@ function run() {
                 core.setFailed('Please ensure you have the workflow trigger as release.');
                 return;
             }
-            const semver = github.context.payload.release.tag_name;
             const path = core.getInput('path');
-            yield tarHelper.createTarBall(path);
-            yield (0, api_client_1.publishOciArtifact)(repository, semver);
+            const tarBallCreated = yield tarHelper.createTarBall(path);
+            const semver = github.context.payload.release.tag_name;
+            if (tarBallCreated) {
+                yield apiClient.publishOciArtifact(repository, semver);
+            }
         }
         catch (error) {
             if (error instanceof Error)
@@ -179,6 +182,7 @@ function run() {
         }
     });
 }
+exports.run = run;
 run();
 
 
@@ -247,12 +251,14 @@ function createTarBall(path) {
                 : `tar -czf ${tempDir}/archive.tar.gz ${path} ${actionFileWithExtension}`;
             yield exec.exec(cmd);
             core.info(`Tar ball created.`);
+            return true;
         }
         catch (error) {
             let errorMessage = `Creation of tarball failed! `;
             if (error instanceof Error && error.message)
                 errorMessage += `${error.message}`;
             core.setFailed(errorMessage);
+            return false;
         }
     });
 }
