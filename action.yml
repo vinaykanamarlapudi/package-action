@@ -10,10 +10,6 @@ inputs:
     required: false
     description: The work directory or path to be tar archived and uploaded as OCI Artifact layer.
     default: '.'
-  semver:
-    required: true
-    description: 'Release version'
-    default: ${{ github.event.release.tag_name }}
 outputs:
   package-url: 
     description: 'The name of package published to GHCR along with semver. For example, https://ghcr.io/actions/package-action:1.0.1'

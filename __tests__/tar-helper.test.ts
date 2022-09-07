@@ -8,7 +8,7 @@ import {
 
 describe('Tar create', () => {
   const timeoutMs: number = 35000
-  const tempDir = './tmp'
+  const tempDir = '/tmp'
   beforeAll(() => {
     jest.spyOn(core, 'setFailed').mockImplementation(param => {
       return param

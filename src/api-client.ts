@@ -22,7 +22,7 @@ export async function publishOciArtifact(
     core.info(
       `Creating GHCR package for release with semver:${semver} with path:"${path}"`
     )
-    const tempDir = './tmp'
+    const tempDir = '/tmp'
     const fileStream = fs.createReadStream(`${tempDir}/archive.tar.gz`)
 
     const response = await axios.post(publishPackageEndpoint, fileStream, {
