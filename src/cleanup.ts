@@ -10,7 +10,7 @@ export async function run(): Promise<void> {
   }
 }
 function removeTarArchive(): void {
-  const path = './tmp/archive.tar.gz'
+  const path = '/tmp/archive.tar.gz'
   try {
     fs.unlinkSync(path)
     core.info(`Action archive cleanup done!`)

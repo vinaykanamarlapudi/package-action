@@ -2073,7 +2073,7 @@ function run() {
 }
 exports.run = run;
 function removeTarArchive() {
-    const path = './tmp/archive.tar.gz';
+    const path = '/tmp/archive.tar.gz';
     try {
         fs.unlinkSync(path);
         core.info(`Action archive cleanup done!`);
