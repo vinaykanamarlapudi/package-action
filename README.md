@@ -8,10 +8,15 @@ This action packages your action repository as OCI artifacts and publishes it to
 
 The whole action repository is packaged by default. Set `path` input to specify which path you want to package if you want only a few folders (for eg. dist) to be packaged.
 
+Make sure you use the [Starter Workflow] (https://github.com/actions-on-packages/.github) to run the action and ensure you have the release trigger in the workflow where you use this action. 
+
 # Usage
 
 <!-- start usage -->
 ```yaml
+on: 
+  release: 
+
 - uses: actions/package-action@1.0.1
   with:
   
