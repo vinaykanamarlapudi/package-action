@@ -6,12 +6,17 @@
 
 This action packages your action repository as OCI artifacts and publishes it to [GHCR](ghcr.io), so your action can then be consumed as a package to make the actions ecosystem more secure.
 
-The whole action repository is packaged by default. Set `workdir` input to specify which path you want to package if you want only a few folders (for eg. dist) to be packaged.
+The whole action repository is packaged by default. Set `path` input to specify which path you want to package if you want only a few folders (for eg. dist) to be packaged.
+
+Make sure you use the [Starter Workflow] (https://github.com/actions-on-packages/.github) to run the action and ensure you have the release trigger in the workflow where you use this action. 
 
 # Usage
 
 <!-- start usage -->
 ```yaml
+on: 
+  release: 
+
 - uses: actions/package-action@1.0.1
   with:
   
@@ -31,13 +36,7 @@ The whole action repository is packaged by default. Set `workdir` input to speci
     # 
     # This defaults to the entire action repository contents if not explicitly defined.
     # Default: '.'
-    workdir: 'src/ action.yml dist/'
-    
-    # Semver compliant release version for the action release.
-    # 
-    # This defaults to the semver tag created during the release event.
-    # Default: ${{ github.event.release.tag_name }}
-    semver: '1.0.1'
+    path: 'src/ action.yml dist/'
 
     
 ```

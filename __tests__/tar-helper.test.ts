@@ -1,8 +1,14 @@
 import * as core from '@actions/core'
 import * as fs from 'fs'
-import * as tarHelper from '../src/tar-helper'
+import {
+  createTarBall,
+  isActionYamlPresentInPathSrc,
+  isValidPath
+} from '../src/tar-helper'
 
 describe('Tar create', () => {
+  const timeoutMs: number = 35000
+  const tempDir = '/tmp'
   beforeAll(() => {
     jest.spyOn(core, 'setFailed').mockImplementation(param => {
       return param
@@ -14,49 +20,112 @@ describe('Tar create', () => {
     jest.spyOn(core, 'debug').mockImplementation(jest.fn())
   })
 
-  it('has successfully created a tar.gzip with default workdir input', async () => {
-    let inputs = {
-      workdir: '.'
-    } as any
+  it(
+    'has successfully created a tar.gzip with default path input',
+    async () => {
+      let inputs = {
+        path: '.'
+      } as any
 
-    jest.spyOn(core, 'getInput').mockImplementation((name: string) => {
-      return inputs[name]
-    })
-    const workdir = core.getInput('workdir')
-    fs.existsSync('./archive.tar.gz') == false
-    await tarHelper.createTarBall(workdir)
-    fs.existsSync('./archive.tar.gz') == true
-    expect(core.setFailed).not.toHaveBeenCalled()
-    expect(core.info).toHaveBeenCalledWith('Tar ball created.')
-  }, 30000)
+      jest.spyOn(core, 'getInput').mockImplementation((name: string) => {
+        return inputs[name]
+      })
+      const path = core.getInput('path')
+      fs.existsSync(`${tempDir}/archive.tar.gz`) == false
+      const tarBallCreated = await createTarBall(path)
+      expect(tarBallCreated).toBe(true)
+      fs.existsSync(`${tempDir}/archive.tar.gz`) == true
+      expect(core.setFailed).not.toHaveBeenCalled()
+      expect(core.info).toHaveBeenCalledWith('Tar ball created.')
+    },
+    timeoutMs
+  )
 
-  it('has successfully created a tar.gzip with custom workdir input', async () => {
-    let inputs = {
-      workdir: 'dist/ action.yml'
-    } as any
+  it(
+    'has successfully created a tar.gzip with custom path input',
+    async () => {
+      let inputs = {
+        path: 'dist/ action.yml'
+      } as any
 
-    jest.spyOn(core, 'getInput').mockImplementation((name: string) => {
-      return inputs[name]
-    })
-    const workdir = core.getInput('workdir')
-    fs.existsSync('./archive.tar.gz') == false
-    await tarHelper.createTarBall(workdir)
-    fs.existsSync('./archive.tar.gz') == true
-    expect(core.setFailed).not.toHaveBeenCalled()
-    expect(core.info).toHaveBeenCalledWith('Tar ball created.')
-  }, 30000)
+      jest.spyOn(core, 'getInput').mockImplementation((name: string) => {
+        return inputs[name]
+      })
+      const path = core.getInput('path')
+      fs.existsSync(`${tempDir}/archive.tar.gz`) == false
+      const tarBallCreated = await createTarBall(path)
+      expect(tarBallCreated).toBe(true)
+      fs.existsSync(`${tempDir}/archive.tar.gz`) == true
+      expect(core.setFailed).not.toHaveBeenCalled()
+      expect(core.info).toHaveBeenCalledWith('Tar ball created.')
+    },
+    timeoutMs
+  )
 
-  it('has not created a tar.gzip with default workdir input', () => {
-    const workdir = '.'
-    fs.existsSync('./archive.tar.gz') == false
+  it('has not created a tar.gzip with default path input', () => {
+    const path = '.'
+    fs.existsSync(`${tempDir}/archive.tar.gz`) == false
     expect(core.setFailed).not.toHaveBeenCalled()
     expect(core.info).not.toHaveBeenCalled()
   })
 
-  it('has not created a tar.gzip with custom workdir input', () => {
-    const workdir = 'dist/ action.yml'
-    fs.existsSync('./archive.tar.gz') == false
+  it('has not created a tar.gzip with custom path input', () => {
+    const path = 'dist/ action.yml'
+    fs.existsSync(`${tempDir}/archive.tar.gz`) == false
     expect(core.setFailed).not.toHaveBeenCalled()
     expect(core.info).not.toHaveBeenCalled()
+  })
+
+  it(
+    'throws Error with invalid path input',
+    async () => {
+      let inputs = {
+        path: 'disty/ action.yaml'
+      } as any
+
+      jest.spyOn(core, 'getInput').mockImplementation((name: string) => {
+        return inputs[name]
+      })
+      const path = core.getInput('path')
+
+      const tarBallCreated = await createTarBall(path)
+      expect(tarBallCreated).toBe(false)
+
+      expect(core.setFailed).toHaveBeenCalledWith(
+        'Creation of tarball failed! Invalid path. Please ensure the path input has a valid path defined and separated by a space if you want multiple files/folders to be packaged.'
+      )
+      expect(core.info).not.toHaveBeenCalled()
+    },
+    timeoutMs
+  )
+})
+
+describe('Tar creation path isValidPath', () => {
+  it('is a valid custom pathname', () => {
+    const path = ['dist/', 'action.yml']
+    expect(isValidPath(path)).toBeTruthy()
+  })
+  it('is a valid custom pathname', () => {
+    const path = ['.']
+    expect(isValidPath(path)).toBeTruthy()
+  })
+  it('is an invalid custom pathname', () => {
+    const path = ['distyy']
+    expect(isValidPath(path)).toBeFalsy()
+  })
+})
+
+describe('isActionYamlPresentInPathSrc returns', () => {
+  it('true if action yml is present in src', () => {
+    const path = ['dist', 'action.yml']
+    expect(isActionYamlPresentInPathSrc(path)).toBeTruthy()
+  })
+  it('true if action yml is present in src', () => {
+    const path = ['.']
+    expect(isActionYamlPresentInPathSrc(path)).toBeTruthy()
+  })
+  it('false if action yml is not present in src', () => {
+    const path = ['src']
+    expect(isActionYamlPresentInPathSrc(path)).toBeFalsy()
   })
 })

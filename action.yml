@@ -6,16 +6,14 @@ inputs:
     description: >
       GITHUB_TOKEN having the write:package scope to publish an action package to GHCR.
     default: ${{ github.token }}
-  workdir:
+  path:
     required: false
-    description: The work directory to be tar archived and uploaded as OCI Artifact layer.
+    description: The work directory or path to be tar archived and uploaded as OCI Artifact layer.
     default: '.'
-  semver:
-    required: true
-    description: 'Release version'
 outputs:
   package-url: 
     description: 'The name of package published to GHCR along with semver. For example, https://ghcr.io/actions/package-action:1.0.1'
 runs:
   using: 'node16'
   main: 'dist/index.js'
+  post: 'dist/cleanup/index.js'
