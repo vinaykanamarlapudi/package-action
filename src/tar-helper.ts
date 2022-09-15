@@ -22,35 +22,42 @@ export async function createTarBall(path: string): Promise<boolean> {
     const repoParse = repoNwo.split('/')
     const repoName: string = repoParse[1]
 
-    if (!fs.existsSync(tempDir)) {
+    if (!fs.existsSync(`${tempDir}/${repoName}`)) {
       fs.mkdirSync(`${tempDir}/${repoName}`);
     }
 
     pathArray.forEach(async(filePath) => {
-      console.log(filePath)
-      await fs.promises.cp(`${filePath}`,`${tempDir}/${repoName}`, {recursive: true})
-      // await exec.exec(`cp -r ${filePath} ${tempDir}/${repoName}`)
+      // fs.promises.cp(`${filePath}`,`${tempDir}/${repoName}`, {recursive: true})
+       await exec.exec(`cp -r ${filePath} ${tempDir}/${repoName}`)
     })
-    
+  
     // mkdir repo_name 
     // cp <contents of path> repo_name
     // tar -czf folder.tar.gz repo_name
     // tar -czf folder.tar.gz . <Wrong thing>
 
-    const actionFileWithExtension = fs.existsSync('action.yml') ? 'action.yml' : 'action.yaml'
-    if(!isActionYamlPresentInPathSrc(pathArray)){
-      await fs.promises.copyFile(`${actionFileWithExtension}`,`${tempDir}/${repoName}`)
-      // await exec.exec(`cp ${actionFileWithExtension} ${tempDir}/${repoName}`)
-    }
-    const traverse = `cd ${tempDir}`
-    // const traverse = `cd -`
-    await exec.exec(traverse)
-    const cmd = `tar -czf archive.tar.gz ${repoName}`
+    // const actionFileWithExtension = fs.existsSync('action.yml') ? 'action.yml' : 'action.yaml'
+    // if(!isActionYamlPresentInPathSrc(pathArray)){
+    //   await fs.promises.copyFile(`${actionFileWithExtension}`,`${tempDir}/${repoName}`)
+    //   await exec.execSync(`cp ${actionFileWithExtension} ${tempDir}/${repoName}`)
+    // }
+    
+    // fs.mkdirSync(`${repoName}`);
+    
+    // await fs.promises.cp(`${tempDir}/${repoName}`,`${repoName}`, {recursive: true})
+    await exec.exec(`cp -r ${tempDir}/${repoName} .`)
+
+  
+  
+    const cmd = `tar -czf ${tempDir}/archive.tar.gz ${repoName}`
 
     await exec.exec(cmd)
     core.info(`Tar ball created.`)
+    await exec.exec(`rm -rf ${repoName}`)
+    await exec.exec(`rm -rf ${tempDir}/${repoName}`)
     return true
   } catch (error) {
+  
     let errorMessage = `Creation of tarball failed! `
     if (error instanceof Error && error.message)
       errorMessage += `${error.message}`

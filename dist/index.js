@@ -248,29 +248,30 @@ function createTarBall(path) {
             const repoNwo = process.env.GITHUB_REPOSITORY || '';
             const repoParse = repoNwo.split('/');
             const repoName = repoParse[1];
-            if (!fs.existsSync(tempDir)) {
+            if (!fs.existsSync(`${tempDir}/${repoName}`)) {
                 fs.mkdirSync(`${tempDir}/${repoName}`);
             }
             pathArray.forEach((filePath) => __awaiter(this, void 0, void 0, function* () {
-                console.log(filePath);
-                yield fs.promises.cp(`${filePath}`, `${tempDir}/${repoName}`, { recursive: true });
-                // await exec.exec(`cp -r ${filePath} ${tempDir}/${repoName}`)
+                // fs.promises.cp(`${filePath}`,`${tempDir}/${repoName}`, {recursive: true})
+                yield exec.exec(`cp -r ${filePath} ${tempDir}/${repoName}`);
             }));
             // mkdir repo_name 
             // cp <contents of path> repo_name
             // tar -czf folder.tar.gz repo_name
             // tar -czf folder.tar.gz . <Wrong thing>
-            const actionFileWithExtension = fs.existsSync('action.yml') ? 'action.yml' : 'action.yaml';
-            if (!isActionYamlPresentInPathSrc(pathArray)) {
-                yield fs.promises.copyFile(`${actionFileWithExtension}`, `${tempDir}/${repoName}`);
-                // await exec.exec(`cp ${actionFileWithExtension} ${tempDir}/${repoName}`)
-            }
-            const traverse = `cd ${tempDir}`;
-            // const traverse = `cd -`
-            yield exec.exec(traverse);
-            const cmd = `tar -czf archive.tar.gz ${repoName}`;
+            // const actionFileWithExtension = fs.existsSync('action.yml') ? 'action.yml' : 'action.yaml'
+            // if(!isActionYamlPresentInPathSrc(pathArray)){
+            //   await fs.promises.copyFile(`${actionFileWithExtension}`,`${tempDir}/${repoName}`)
+            //   await exec.execSync(`cp ${actionFileWithExtension} ${tempDir}/${repoName}`)
+            // }
+            // fs.mkdirSync(`${repoName}`);
+            // await fs.promises.cp(`${tempDir}/${repoName}`,`${repoName}`, {recursive: true})
+            yield exec.exec(`cp -r ${tempDir}/${repoName} .`);
+            const cmd = `tar -czf ${tempDir}/archive.tar.gz ${repoName}`;
             yield exec.exec(cmd);
             core.info(`Tar ball created.`);
+            yield exec.exec(`rm -rf ${repoName}`);
+            yield exec.exec(`rm -rf ${tempDir}/${repoName}`);
             return true;
         }
         catch (error) {
