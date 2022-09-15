@@ -35,14 +35,17 @@ export async function createTarBall(path: string): Promise<boolean> {
     // mkdir repo_name 
     // cp <contents of path> repo_name
     // tar -czf folder.tar.gz repo_name
-    // tar -czf folder.tar.gz . <Wrong thingy>
+    // tar -czf folder.tar.gz . <Wrong thing>
 
     const actionFileWithExtension = fs.existsSync('action.yml') ? 'action.yml' : 'action.yaml'
     if(!isActionYamlPresentInPathSrc(pathArray)){
       await fs.promises.copyFile(`${actionFileWithExtension}`,`${tempDir}/${repoName}`)
       // await exec.exec(`cp ${actionFileWithExtension} ${tempDir}/${repoName}`)
     }
-    const cmd = `tar -czf ${tempDir}/archive.tar.gz ${tempDir}/${repoName}`
+    const traverse = `cd ${tempDir}`
+    // const traverse = `cd -`
+    await exec.exec(traverse)
+    const cmd = `tar -czf archive.tar.gz ${repoName}`
 
     await exec.exec(cmd)
     core.info(`Tar ball created.`)
