@@ -37,13 +37,7 @@ export async function publishOciArtifact(
     //   }
     // })
 
-    const response = await exec.getExecOutput(`curl --request POST \
-          --url '${publishPackageEndpoint}' \
-          --header 'authorization: Bearer ${TOKEN}' \
-          --header 'content-type: application/octet-stream' \
-          --header 'tag: ${semver}' \
-          --data-binary '@/tmp/archive.tar.gz' \
-          --fail`)
+    const response = await exec.getExecOutput(`curl --request POST --url "${publishPackageEndpoint}" --header "authorization: Bearer ${TOKEN}" --header "content-type: application/octet-stream" --header "tag: ${semver}" --data-binary "@/tmp/archive.tar.gz" --fail`)
 
     core.info(
       `Created GHCR package for semver(${semver}) with package URL ${response.stdout}`
