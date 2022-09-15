@@ -25,24 +25,25 @@ export async function publishOciArtifact(
       `Creating GHCR package for release with semver:${semver} with path:"${path}"`
     )
     const tempDir = '/tmp'
-    const byteData = fs.readFileSync(`${tempDir}/archive.tar.gz`, 'binary')
-    // const fileBinary = fs.readFileSync
+    // const byteData = fs.readFileSync(`${tempDir}/archive.tar.gz`, 'binary')
+    const fileStream = fs.createReadStream(`${tempDir}/archive.tar.gz`)
 
-    // const response = await axios.post(publishPackageEndpoint, byteData, {
-    //   headers: {
-    //     Accept: 'application/vnd.github.v3+json',
-    //     Authorization: `Bearer ${TOKEN}`,
-    //     'Content-type': 'application/octet-stream',
-    //     tag: `${semver}`
-    //   }
-    // })
 
-    const response = await exec.getExecOutput(`curl --request POST --url "${publishPackageEndpoint}" --header "authorization: Bearer ${TOKEN}" --header "content-type: application/octet-stream" --header "tag: ${semver}" --data-binary "@/tmp/archive.tar.gz" --fail`)
+    const response = await axios.post(publishPackageEndpoint, fileStream, {
+      headers: {
+        Accept: 'application/vnd.github.v3+json',
+        Authorization: `Bearer ${TOKEN}`,
+        'Content-type': 'application/octet-stream',
+        tag: `${semver}`
+      }
+    })
+
+    // const response = await exec.getExecOutput(`curl --request POST --url "${publishPackageEndpoint}" --header "authorization: Bearer ${TOKEN}" --header "content-type: application/octet-stream" --header "tag: ${semver}" --data-binary "__tests__/typescript-action-1.0.0.tar.gz" --fail`)
 
     core.info(
-      `Created GHCR package for semver(${semver}) with package URL ${response.stdout}`
+      `Created GHCR package for semver(${semver}) with package URL ${response.data.package_url}`
     )
-    core.setOutput('package-url', `${response.stdout}`)
+    core.setOutput('package-url', `${response.data.package_url}`)
   } catch (error) {
     errorResponseHandling(error, semver)
   }

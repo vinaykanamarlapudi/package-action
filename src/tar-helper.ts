@@ -1,6 +1,7 @@
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
 import * as fs from 'fs'
+import * as github from '@actions/github'
 
 // Creates a tar.gzip of the inputs specified in path input or the entire contents
 export async function createTarBall(path: string): Promise<boolean> {
@@ -17,12 +18,32 @@ export async function createTarBall(path: string): Promise<boolean> {
         'Invalid path. Please ensure the path input has a valid path defined and separated by a space if you want multiple files/folders to be packaged.'
       )
     }
-    const actionFileWithExtension = fs.existsSync('action.yml')
-      ? 'action.yml'
-      : 'action.yaml'
-    const cmd = isActionYamlPresentInPathSrc(pathArray)
-      ? `tar -czf ${tempDir}/archive.tar.gz ${path}`
-      : `tar -czf ${tempDir}/archive.tar.gz ${path} ${actionFileWithExtension}`
+    const repoNwo: string = process.env.GITHUB_REPOSITORY || '';
+    const repoParse = repoNwo.split('/')
+    const repoName: string = repoParse[1]
+
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(`${tempDir}/${repoName}`);
+    }
+
+    pathArray.forEach(async(filePath) => {
+      console.log(filePath)
+      await fs.promises.cp(`${filePath}`,`${tempDir}/${repoName}`, {recursive: true})
+      // await exec.exec(`cp -r ${filePath} ${tempDir}/${repoName}`)
+    })
+    
+    // mkdir repo_name 
+    // cp <contents of path> repo_name
+    // tar -czf folder.tar.gz repo_name
+    // tar -czf folder.tar.gz . <Wrong thingy>
+
+    const actionFileWithExtension = fs.existsSync('action.yml') ? 'action.yml' : 'action.yaml'
+    if(!isActionYamlPresentInPathSrc(pathArray)){
+      await fs.promises.copyFile(`${actionFileWithExtension}`,`${tempDir}/${repoName}`)
+      // await exec.exec(`cp ${actionFileWithExtension} ${tempDir}/${repoName}`)
+    }
+    const cmd = `tar -czf ${tempDir}/archive.tar.gz ${tempDir}/${repoName}`
+
     await exec.exec(cmd)
     core.info(`Tar ball created.`)
     return true
