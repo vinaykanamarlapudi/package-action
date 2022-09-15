@@ -1,6 +1,7 @@
 import * as core from '@actions/core'
 import axios from 'axios'
 import * as fs from 'fs'
+import { blob } from 'stream/consumers'
 
 //returns the API Base Url
 export function getApiBaseUrl(): string {
@@ -23,9 +24,9 @@ export async function publishOciArtifact(
       `Creating GHCR package for release with semver:${semver} with path:"${path}"`
     )
     const tempDir = '/tmp'
-    const fileStream = fs.createReadStream(`${tempDir}/archive.tar.gz`)
-
-    const response = await axios.post(publishPackageEndpoint, fileStream, {
+    const byteData = fs.readFileSync(`${tempDir}/archive.tar.gz`, 'utf8')
+  
+    const response = await axios.post(publishPackageEndpoint, byteData, {
       headers: {
         Accept: 'application/vnd.github.v3+json',
         Authorization: `Bearer ${TOKEN}`,
