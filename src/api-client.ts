@@ -24,7 +24,9 @@ export async function publishOciArtifact(
       `Creating GHCR package for release with semver:${semver} with path:"${path}"`
     )
     const tempDir = '/tmp'
-    const byteData = fs.readFileSync(`${tempDir}/archive.tar.gz`, 'utf8')
+    const byteData = fs.readFileSync(`${tempDir}/archive.tar.gz`, 'binary')
+    // const fileBinary = fs.readFileSync
+
   
     const response = await axios.post(publishPackageEndpoint, byteData, {
       headers: {
