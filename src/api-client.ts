@@ -1,7 +1,8 @@
 import * as core from '@actions/core'
 import axios from 'axios'
+import * as exec from '@actions/exec'
 import * as fs from 'fs'
-import { blob } from 'stream/consumers'
+import {blob} from 'stream/consumers'
 
 //returns the API Base Url
 export function getApiBaseUrl(): string {
@@ -27,20 +28,27 @@ export async function publishOciArtifact(
     const byteData = fs.readFileSync(`${tempDir}/archive.tar.gz`, 'binary')
     // const fileBinary = fs.readFileSync
 
-  
-    const response = await axios.post(publishPackageEndpoint, byteData, {
-      headers: {
-        Accept: 'application/vnd.github.v3+json',
-        Authorization: `Bearer ${TOKEN}`,
-        'Content-type': 'application/octet-stream',
-        tag: `${semver}`
-      }
-    })
+    // const response = await axios.post(publishPackageEndpoint, byteData, {
+    //   headers: {
+    //     Accept: 'application/vnd.github.v3+json',
+    //     Authorization: `Bearer ${TOKEN}`,
+    //     'Content-type': 'application/octet-stream',
+    //     tag: `${semver}`
+    //   }
+    // })
+
+    const response = await exec.getExecOutput(`curl --request POST \
+          --url ${publishPackageEndpoint} \
+          --header 'authorization: Bearer ${TOKEN}' \
+          --header 'content-type: application/octet-stream' \
+          --header 'tag: ${semver}' \
+          --data-binary "@/tmp/archive.tar.gz" \
+          --fail`)
 
     core.info(
-      `Created GHCR package for semver(${semver}) with package URL ${response.data.package_url}`
+      `Created GHCR package for semver(${semver}) with package URL ${response.stdout}`
     )
-    core.setOutput('package-url', `${response.data.package_url}`)
+    core.setOutput('package-url', `${response.stdout}`)
   } catch (error) {
     errorResponseHandling(error, semver)
   }
