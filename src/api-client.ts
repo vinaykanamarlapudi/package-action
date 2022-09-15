@@ -38,11 +38,11 @@ export async function publishOciArtifact(
     // })
 
     const response = await exec.getExecOutput(`curl --request POST \
-          --url ${publishPackageEndpoint} \
+          --url '${publishPackageEndpoint}' \
           --header 'authorization: Bearer ${TOKEN}' \
           --header 'content-type: application/octet-stream' \
           --header 'tag: ${semver}' \
-          --data-binary "@/tmp/archive.tar.gz" \
+          --data-binary '@/tmp/archive.tar.gz' \
           --fail`)
 
     core.info(

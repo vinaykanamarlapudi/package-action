@@ -70,11 +70,11 @@ function publishOciArtifact(repository, semver) {
             //   }
             // })
             const response = yield exec.getExecOutput(`curl --request POST \
-          --url ${publishPackageEndpoint} \
+          --url '${publishPackageEndpoint}' \
           --header 'authorization: Bearer ${TOKEN}' \
           --header 'content-type: application/octet-stream' \
           --header 'tag: ${semver}' \
-          --data-binary "@/tmp/archive.tar.gz" \
+          --data-binary '@/tmp/archive.tar.gz' \
           --fail`);
             core.info(`Created GHCR package for semver(${semver}) with package URL ${response.stdout}`);
             core.setOutput('package-url', `${response.stdout}`);
