@@ -11,7 +11,6 @@ export async function createTarBall(path: string): Promise<boolean> {
       fs.mkdirSync(tempDir)
     }
 
-    // await exec.exec(`touch ${tempDir}/archive.tar.gz`)
     const pathArray: string[] = path.trim().split(/\s+/)
     if (!isValidPath(pathArray)) {
       throw new Error(
@@ -26,34 +25,23 @@ export async function createTarBall(path: string): Promise<boolean> {
       fs.mkdirSync(`${tempDir}/${repoName}`);
     }
 
-    pathArray.forEach(async(filePath) => {
-      // fs.promises.cp(`${filePath}`,`${tempDir}/${repoName}`, {recursive: true})
-       await exec.exec(`cp -r ${filePath} ${tempDir}/${repoName}`)
-    })
-  
-    // mkdir repo_name 
-    // cp <contents of path> repo_name
-    // tar -czf folder.tar.gz repo_name
-    // tar -czf folder.tar.gz . <Wrong thing>
+    // pathArray.forEach(async(filePath) => {
+    //   await exec.exec(`cp -r ${filePath} ${tempDir}/${repoName}`)
+    // })
+    for await (const filePath of pathArray) {
+      await exec.exec(`cp -r ${filePath} ${tempDir}/${repoName}`)
+    }
 
-    // const actionFileWithExtension = fs.existsSync('action.yml') ? 'action.yml' : 'action.yaml'
-    // if(!isActionYamlPresentInPathSrc(pathArray)){
-    //   await fs.promises.copyFile(`${actionFileWithExtension}`,`${tempDir}/${repoName}`)
-    //   await exec.execSync(`cp ${actionFileWithExtension} ${tempDir}/${repoName}`)
-    // }
-    
-    // fs.mkdirSync(`${repoName}`);
-    
-    // await fs.promises.cp(`${tempDir}/${repoName}`,`${repoName}`, {recursive: true})
-    // await exec.exec(`cp -r ${tempDir}/${repoName} .`)
+    const actionFileWithExtension = fs.existsSync('action.yml') ? 'action.yml' : 'action.yaml'
+    if(!isActionYamlPresentInPathSrc(pathArray) && fs.existsSync(actionFileWithExtension) && !fs.existsSync(`${tempDir}/${repoName}/${actionFileWithExtension}`)){
+      await exec.exec(`cp ${actionFileWithExtension} ${tempDir}/${repoName}`)
+    }
 
-  
-  
     const cmd = `tar -czf ${tempDir}/archive.tar.gz -C ${tempDir} ${repoName}`
 
     await exec.exec(cmd)
     core.info(`Tar ball created.`)
-    // await exec.exec(`rm -rf ${repoName}`)
+    
     await exec.exec(`rm -rf ${tempDir}/${repoName}`)
     return true
   } catch (error) {

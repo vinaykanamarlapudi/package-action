@@ -227,6 +227,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __asyncValues = (this && this.__asyncValues) || function (o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator], i;
+    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.isActionYamlPresentInPathSrc = exports.isValidPath = exports.createTarBall = void 0;
 const core = __importStar(__nccwpck_require__(2186));
@@ -234,13 +241,13 @@ const exec = __importStar(__nccwpck_require__(1514));
 const fs = __importStar(__nccwpck_require__(7147));
 // Creates a tar.gzip of the inputs specified in path input or the entire contents
 function createTarBall(path) {
+    var e_1, _a;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const tempDir = '/tmp';
             if (!fs.existsSync(tempDir)) {
                 fs.mkdirSync(tempDir);
             }
-            // await exec.exec(`touch ${tempDir}/archive.tar.gz`)
             const pathArray = path.trim().split(/\s+/);
             if (!isValidPath(pathArray)) {
                 throw new Error('Invalid path. Please ensure the path input has a valid path defined and separated by a space if you want multiple files/folders to be packaged.');
@@ -251,26 +258,29 @@ function createTarBall(path) {
             if (!fs.existsSync(`${tempDir}/${repoName}`)) {
                 fs.mkdirSync(`${tempDir}/${repoName}`);
             }
-            pathArray.forEach((filePath) => __awaiter(this, void 0, void 0, function* () {
-                // fs.promises.cp(`${filePath}`,`${tempDir}/${repoName}`, {recursive: true})
-                yield exec.exec(`cp -r ${filePath} ${tempDir}/${repoName}`);
-            }));
-            // mkdir repo_name 
-            // cp <contents of path> repo_name
-            // tar -czf folder.tar.gz repo_name
-            // tar -czf folder.tar.gz . <Wrong thing>
-            // const actionFileWithExtension = fs.existsSync('action.yml') ? 'action.yml' : 'action.yaml'
-            // if(!isActionYamlPresentInPathSrc(pathArray)){
-            //   await fs.promises.copyFile(`${actionFileWithExtension}`,`${tempDir}/${repoName}`)
-            //   await exec.execSync(`cp ${actionFileWithExtension} ${tempDir}/${repoName}`)
-            // }
-            // fs.mkdirSync(`${repoName}`);
-            // await fs.promises.cp(`${tempDir}/${repoName}`,`${repoName}`, {recursive: true})
-            // await exec.exec(`cp -r ${tempDir}/${repoName} .`)
+            try {
+                // pathArray.forEach(async(filePath) => {
+                //   await exec.exec(`cp -r ${filePath} ${tempDir}/${repoName}`)
+                // })
+                for (var pathArray_1 = __asyncValues(pathArray), pathArray_1_1; pathArray_1_1 = yield pathArray_1.next(), !pathArray_1_1.done;) {
+                    const filePath = pathArray_1_1.value;
+                    yield exec.exec(`cp -r ${filePath} ${tempDir}/${repoName}`);
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (pathArray_1_1 && !pathArray_1_1.done && (_a = pathArray_1.return)) yield _a.call(pathArray_1);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
+            const actionFileWithExtension = fs.existsSync('action.yml') ? 'action.yml' : 'action.yaml';
+            if (!isActionYamlPresentInPathSrc(pathArray) && fs.existsSync(actionFileWithExtension) && !fs.existsSync(`${tempDir}/${repoName}/${actionFileWithExtension}`)) {
+                yield exec.exec(`cp ${actionFileWithExtension} ${tempDir}/${repoName}`);
+            }
             const cmd = `tar -czf ${tempDir}/archive.tar.gz -C ${tempDir} ${repoName}`;
             yield exec.exec(cmd);
             core.info(`Tar ball created.`);
-            // await exec.exec(`rm -rf ${repoName}`)
             yield exec.exec(`rm -rf ${tempDir}/${repoName}`);
             return true;
         }
