@@ -31,13 +31,6 @@ describe('Tar create', () => {
   //     }
   //     console.log("File deleted successfully")
   //   })
-  //   fs.rm(`is-awesome`, { recursive: true, force: true }, (err) => {
-  //     if(err){
-  //         console.error(err.message);
-  //         return;
-  //     }
-  //     console.log("File deleted successfully")
-  //   })
   // })
 
   it('has successfully created a tar.gzip with default path input', async () => {

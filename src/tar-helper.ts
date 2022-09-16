@@ -11,7 +11,7 @@ export async function createTarBall(path: string): Promise<boolean> {
       fs.mkdirSync(tempDir)
     }
 
-    await exec.exec(`touch ${tempDir}/archive.tar.gz`)
+    // await exec.exec(`touch ${tempDir}/archive.tar.gz`)
     const pathArray: string[] = path.trim().split(/\s+/)
     if (!isValidPath(pathArray)) {
       throw new Error(
@@ -45,15 +45,15 @@ export async function createTarBall(path: string): Promise<boolean> {
     // fs.mkdirSync(`${repoName}`);
     
     // await fs.promises.cp(`${tempDir}/${repoName}`,`${repoName}`, {recursive: true})
-    await exec.exec(`cp -r ${tempDir}/${repoName} .`)
+    // await exec.exec(`cp -r ${tempDir}/${repoName} .`)
 
   
   
-    const cmd = `tar -czf ${tempDir}/archive.tar.gz ${repoName}`
+    const cmd = `tar -czf ${tempDir}/archive.tar.gz -C ${tempDir} ${repoName}`
 
     await exec.exec(cmd)
     core.info(`Tar ball created.`)
-    await exec.exec(`rm -rf ${repoName}`)
+    // await exec.exec(`rm -rf ${repoName}`)
     await exec.exec(`rm -rf ${tempDir}/${repoName}`)
     return true
   } catch (error) {

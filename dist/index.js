@@ -240,7 +240,7 @@ function createTarBall(path) {
             if (!fs.existsSync(tempDir)) {
                 fs.mkdirSync(tempDir);
             }
-            yield exec.exec(`touch ${tempDir}/archive.tar.gz`);
+            // await exec.exec(`touch ${tempDir}/archive.tar.gz`)
             const pathArray = path.trim().split(/\s+/);
             if (!isValidPath(pathArray)) {
                 throw new Error('Invalid path. Please ensure the path input has a valid path defined and separated by a space if you want multiple files/folders to be packaged.');
@@ -266,11 +266,11 @@ function createTarBall(path) {
             // }
             // fs.mkdirSync(`${repoName}`);
             // await fs.promises.cp(`${tempDir}/${repoName}`,`${repoName}`, {recursive: true})
-            yield exec.exec(`cp -r ${tempDir}/${repoName} .`);
-            const cmd = `tar -czf ${tempDir}/archive.tar.gz ${repoName}`;
+            // await exec.exec(`cp -r ${tempDir}/${repoName} .`)
+            const cmd = `tar -czf ${tempDir}/archive.tar.gz -C ${tempDir} ${repoName}`;
             yield exec.exec(cmd);
             core.info(`Tar ball created.`);
-            yield exec.exec(`rm -rf ${repoName}`);
+            // await exec.exec(`rm -rf ${repoName}`)
             yield exec.exec(`rm -rf ${tempDir}/${repoName}`);
             return true;
         }
