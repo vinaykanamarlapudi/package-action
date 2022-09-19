@@ -2076,8 +2076,10 @@ function removeTarArchive() {
     return __awaiter(this, void 0, void 0, function* () {
         const path = '/tmp/archive.tar.gz';
         try {
-            if (fs.existsSync(path))
+            if (fs.existsSync(path)) {
+                core.debug(`Deleting temp folder "${path}"`);
                 yield fs.unlinkSync(path);
+            }
             core.info(`Action archive cleanup done!`);
         }
         catch (err) {

@@ -62,7 +62,6 @@ function publishOciArtifact(repository, semver) {
             const publishPackageEndpoint = `${getApiBaseUrl()}/repos/${repository}/actions/package`;
             core.info(`Creating GHCR package for release with semver:${semver} with path:"${path}"`);
             const tempDir = '/tmp';
-            // const byteData = fs.readFileSync(`${tempDir}/archive.tar.gz`, 'binary')
             const fileStream = fs.createReadStream(`${tempDir}/archive.tar.gz`);
             const response = yield axios_1.default.post(publishPackageEndpoint, fileStream, {
                 headers: {
@@ -72,7 +71,6 @@ function publishOciArtifact(repository, semver) {
                     tag: `${semver}`
                 }
             });
-            // const response = await exec.getExecOutput(`curl --request POST --url "${publishPackageEndpoint}" --header "authorization: Bearer ${TOKEN}" --header "content-type: application/octet-stream" --header "tag: ${semver}" --data-binary "__tests__/typescript-action-1.0.0.tar.gz" --fail`)
             core.info(`Created GHCR package for semver(${semver}) with package URL ${response.data.package_url}`);
             core.setOutput('package-url', `${response.data.package_url}`);
         }
@@ -235,7 +233,7 @@ var __asyncValues = (this && this.__asyncValues) || function (o) {
     function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isActionYamlPresentInPathSrc = exports.isValidPath = exports.createTarBall = void 0;
+exports.copyActionFile = exports.isActionYamlPresentInPathSrc = exports.isValidPath = exports.createTarBall = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
 const fs = __importStar(__nccwpck_require__(7147));
@@ -243,8 +241,11 @@ const fs = __importStar(__nccwpck_require__(7147));
 function createTarBall(path) {
     var e_1, _a;
     return __awaiter(this, void 0, void 0, function* () {
+        const tempDir = '/tmp';
+        const repoNwo = process.env.GITHUB_REPOSITORY || '';
+        const repoParse = repoNwo.split('/');
+        const repoName = repoParse[1];
         try {
-            const tempDir = '/tmp';
             if (!fs.existsSync(tempDir)) {
                 fs.mkdirSync(tempDir);
             }
@@ -252,16 +253,10 @@ function createTarBall(path) {
             if (!isValidPath(pathArray)) {
                 throw new Error('Invalid path. Please ensure the path input has a valid path defined and separated by a space if you want multiple files/folders to be packaged.');
             }
-            const repoNwo = process.env.GITHUB_REPOSITORY || '';
-            const repoParse = repoNwo.split('/');
-            const repoName = repoParse[1];
             if (!fs.existsSync(`${tempDir}/${repoName}`)) {
                 fs.mkdirSync(`${tempDir}/${repoName}`);
             }
             try {
-                // pathArray.forEach(async(filePath) => {
-                //   await exec.exec(`cp -r ${filePath} ${tempDir}/${repoName}`)
-                // })
                 for (var pathArray_1 = __asyncValues(pathArray), pathArray_1_1; pathArray_1_1 = yield pathArray_1.next(), !pathArray_1_1.done;) {
                     const filePath = pathArray_1_1.value;
                     yield exec.exec(`cp -r ${filePath} ${tempDir}/${repoName}`);
@@ -274,14 +269,12 @@ function createTarBall(path) {
                 }
                 finally { if (e_1) throw e_1.error; }
             }
-            const actionFileWithExtension = fs.existsSync('action.yml') ? 'action.yml' : 'action.yaml';
-            if (!isActionYamlPresentInPathSrc(pathArray) && fs.existsSync(actionFileWithExtension) && !fs.existsSync(`${tempDir}/${repoName}/${actionFileWithExtension}`)) {
-                yield exec.exec(`cp ${actionFileWithExtension} ${tempDir}/${repoName}`);
+            if (!isActionYamlPresentInPathSrc(pathArray)) {
+                copyActionFile(repoName);
             }
             const cmd = `tar -czf ${tempDir}/archive.tar.gz -C ${tempDir} ${repoName}`;
             yield exec.exec(cmd);
             core.info(`Tar ball created.`);
-            yield exec.exec(`rm -rf ${tempDir}/${repoName}`);
             return true;
         }
         catch (error) {
@@ -290,6 +283,11 @@ function createTarBall(path) {
                 errorMessage += `${error.message}`;
             core.setFailed(errorMessage);
             return false;
+        }
+        finally {
+            if (fs.existsSync(`${tempDir}/${repoName}`)) {
+                yield exec.exec(`rm -rf ${tempDir}/${repoName}`);
+            }
         }
     });
 }
@@ -314,11 +312,32 @@ function isActionYamlPresentInPathSrc(pathArray) {
     });
     // Returns true as soon as action.y(a)ml is found in any of the paths in the provided path input
     return pathArray.some(filePath => {
-        return (fs.existsSync(`${filePath}/action.yml`) ||
-            fs.existsSync(`${filePath}/action.yaml`));
+        return (fs.existsSync(`${filePath}/action.yml`) || fs.existsSync(`${filePath}/action.yaml`));
     });
 }
 exports.isActionYamlPresentInPathSrc = isActionYamlPresentInPathSrc;
+function copyActionFile(repoName) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let actionFileWithExtension = ' ';
+        const tempDir = '/tmp';
+        if (fs.existsSync('action.yml')) {
+            actionFileWithExtension = 'action.yml';
+        }
+        else if (fs.existsSync('action.yaml')) {
+            actionFileWithExtension = 'action.yaml';
+        }
+        if (actionFileWithExtension === ' ') {
+            throw new Error(`action.y(a)ml not found. Release packages can be created only for action repositories.`);
+        }
+        else if (fs.existsSync(`${tempDir}/${repoName}/${actionFileWithExtension}`)) {
+            core.debug(`action.y(a)ml file already exists in ${tempDir}/${repoName}.`);
+        }
+        else {
+            yield exec.exec(`cp ${actionFileWithExtension} ${tempDir}/${repoName}`);
+        }
+    });
+}
+exports.copyActionFile = copyActionFile;
 
 
 /***/ }),
