@@ -270,7 +270,7 @@ function createTarBall(path) {
                 finally { if (e_1) throw e_1.error; }
             }
             if (!isActionYamlPresentInPathSrc(pathArray)) {
-                copyActionFile(repoName);
+                yield copyActionFile(repoName);
             }
             const cmd = `tar -czf ${tempDir}/archive.tar.gz -C ${tempDir} ${repoName}`;
             yield exec.exec(cmd);

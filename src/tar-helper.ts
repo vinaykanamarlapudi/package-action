@@ -30,7 +30,7 @@ export async function createTarBall(path: string): Promise<boolean> {
     }
 
     if (!isActionYamlPresentInPathSrc(pathArray)) {
-      copyActionFile(repoName);
+      await copyActionFile(repoName);
     }
 
     const cmd = `tar -czf ${tempDir}/archive.tar.gz -C ${tempDir} ${repoName}`
