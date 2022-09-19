@@ -2063,7 +2063,7 @@ const core = __importStar(__nccwpck_require__(186));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            removeTarArchive();
+            yield removeTarArchive();
         }
         catch (error) {
             const err = error;
@@ -2073,14 +2073,19 @@ function run() {
 }
 exports.run = run;
 function removeTarArchive() {
-    const path = '/tmp/archive.tar.gz';
-    try {
-        fs.unlinkSync(path);
-        core.info(`Action archive cleanup done!`);
-    }
-    catch (err) {
-        core.info(`Cleanup job failed to complete with error: ${err}`);
-    }
+    return __awaiter(this, void 0, void 0, function* () {
+        const path = '/tmp/archive.tar.gz';
+        try {
+            if (fs.existsSync(path)) {
+                core.debug(`Deleting temp folder "${path}"`);
+                yield fs.unlinkSync(path);
+            }
+            core.info(`Action archive cleanup done!`);
+        }
+        catch (err) {
+            core.info(`Cleanup job failed to complete with error: ${err}`);
+        }
+    });
 }
 run();
 

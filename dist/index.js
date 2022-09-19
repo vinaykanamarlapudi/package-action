@@ -225,30 +225,54 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __asyncValues = (this && this.__asyncValues) || function (o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator], i;
+    return m ? m.call(o) : (o = typeof __values === "function" ? __values(o) : o[Symbol.iterator](), i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i);
+    function verb(n) { i[n] = o[n] && function (v) { return new Promise(function (resolve, reject) { v = o[n](v), settle(resolve, reject, v.done, v.value); }); }; }
+    function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isActionYamlPresentInPathSrc = exports.isValidPath = exports.createTarBall = void 0;
+exports.copyActionFile = exports.isActionYamlPresentInPathSrc = exports.isValidPath = exports.createTarBall = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const exec = __importStar(__nccwpck_require__(1514));
 const fs = __importStar(__nccwpck_require__(7147));
 // Creates a tar.gzip of the inputs specified in path input or the entire contents
 function createTarBall(path) {
+    var e_1, _a;
     return __awaiter(this, void 0, void 0, function* () {
+        const tempDir = '/tmp';
+        const repoNwo = process.env.GITHUB_REPOSITORY || '';
+        const repoParse = repoNwo.split('/');
+        const repoName = repoParse[1];
         try {
-            const tempDir = '/tmp';
             if (!fs.existsSync(tempDir)) {
                 fs.mkdirSync(tempDir);
             }
-            yield exec.exec(`touch ${tempDir}/archive.tar.gz`);
             const pathArray = path.trim().split(/\s+/);
             if (!isValidPath(pathArray)) {
                 throw new Error('Invalid path. Please ensure the path input has a valid path defined and separated by a space if you want multiple files/folders to be packaged.');
             }
-            const actionFileWithExtension = fs.existsSync('action.yml')
-                ? 'action.yml'
-                : 'action.yaml';
-            const cmd = isActionYamlPresentInPathSrc(pathArray)
-                ? `tar -czf ${tempDir}/archive.tar.gz ${path}`
-                : `tar -czf ${tempDir}/archive.tar.gz ${path} ${actionFileWithExtension}`;
+            if (!fs.existsSync(`${tempDir}/${repoName}`)) {
+                fs.mkdirSync(`${tempDir}/${repoName}`);
+            }
+            try {
+                for (var pathArray_1 = __asyncValues(pathArray), pathArray_1_1; pathArray_1_1 = yield pathArray_1.next(), !pathArray_1_1.done;) {
+                    const filePath = pathArray_1_1.value;
+                    yield exec.exec(`cp -r ${filePath} ${tempDir}/${repoName}`);
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (pathArray_1_1 && !pathArray_1_1.done && (_a = pathArray_1.return)) yield _a.call(pathArray_1);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
+            if (!isActionYamlPresentInPathSrc(pathArray)) {
+                yield copyActionFile(repoName);
+            }
+            const cmd = `tar -czf ${tempDir}/archive.tar.gz -C ${tempDir} ${repoName}`;
             yield exec.exec(cmd);
             core.info(`Tar ball created.`);
             return true;
@@ -259,6 +283,11 @@ function createTarBall(path) {
                 errorMessage += `${error.message}`;
             core.setFailed(errorMessage);
             return false;
+        }
+        finally {
+            if (fs.existsSync(`${tempDir}/${repoName}`)) {
+                yield exec.exec(`rm -rf ${tempDir}/${repoName}`);
+            }
         }
     });
 }
@@ -283,11 +312,32 @@ function isActionYamlPresentInPathSrc(pathArray) {
     });
     // Returns true as soon as action.y(a)ml is found in any of the paths in the provided path input
     return pathArray.some(filePath => {
-        return (fs.existsSync(`${filePath}/action.yml`) ||
-            fs.existsSync(`${filePath}/action.yaml`));
+        return (fs.existsSync(`${filePath}/action.yml`) || fs.existsSync(`${filePath}/action.yaml`));
     });
 }
 exports.isActionYamlPresentInPathSrc = isActionYamlPresentInPathSrc;
+function copyActionFile(repoName) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let actionFileWithExtension = ' ';
+        const tempDir = '/tmp';
+        if (fs.existsSync('action.yml')) {
+            actionFileWithExtension = 'action.yml';
+        }
+        else if (fs.existsSync('action.yaml')) {
+            actionFileWithExtension = 'action.yaml';
+        }
+        if (actionFileWithExtension === ' ') {
+            throw new Error(`action.y(a)ml not found. Release packages can be created only for action repositories.`);
+        }
+        else if (fs.existsSync(`${tempDir}/${repoName}/${actionFileWithExtension}`)) {
+            core.debug(`action.y(a)ml file already exists in ${tempDir}/${repoName}.`);
+        }
+        else {
+            yield exec.exec(`cp ${actionFileWithExtension} ${tempDir}/${repoName}`);
+        }
+    });
+}
+exports.copyActionFile = copyActionFile;
 
 
 /***/ }),

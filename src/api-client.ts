@@ -9,10 +9,7 @@ export function getApiBaseUrl(): string {
 }
 
 // Publish the Action Artifact to GHCR by calling the post API
-export async function publishOciArtifact(
-  repository: string,
-  semver: string
-): Promise<void> {
+export async function publishOciArtifact(repository: string, semver: string): Promise<void> {
   try {
     const TOKEN: string = core.getInput('token')
     core.setSecret(TOKEN)
@@ -45,29 +42,29 @@ export async function publishOciArtifact(
 
 // Respond with the appropriate error message based on response
 function errorResponseHandling(error: any, semver: string): void {
-  if (error.response) {
+  if(error.response) {
     let errorMessage = `Failed to create package (status: ${error.response.status}) with semver ${semver}. `
     if (error.response.status === 400) {
       if (error.message) {
         errorMessage += `\nResponded with: "${error.message}"`
       }
     } else if (error.response.status === 403) {
-      errorMessage += `Ensure GITHUB_TOKEN has permission "packages: write". `
+        errorMessage += `Ensure GITHUB_TOKEN has permission "packages: write". `
     } else if (error.response.status === 404) {
-      errorMessage += `Ensure GitHub Actions have been enabled. `
-      if (error.message) {
-        errorMessage += `\nResponded with: "${error.message}"`
-      }
+        errorMessage += `Ensure GitHub Actions have been enabled. `
+        if (error.message) {
+          errorMessage += `\nResponded with: "${error.message}"`
+        }
     } else if (error.response.status >= 500) {
-      errorMessage += `Server error, is githubstatus.com reporting a GHCR outage? Please re-run the release at a later time. `
-      if (error.message) {
-        errorMessage += `\nResponded with: "${error.message}"`
-      }
+        errorMessage += `Server error, is githubstatus.com reporting a GHCR outage? Please re-run the release at a later time. `
+        if (error.message) {
+          errorMessage += `\nResponded with: "${error.message}"`
+        }
     }
     core.setFailed(errorMessage)
   } else {
-    core.setFailed(
-      `An unexpected error occured with error:\n${JSON.stringify(error)}`
-    )
+      core.setFailed(
+        `An unexpected error occured with error:\n${JSON.stringify(error)}`
+      )
   }
 }
