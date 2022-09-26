@@ -17,10 +17,11 @@ export async function run(): Promise<void> {
 
     const path: string = core.getInput('path')
     const tarBallCreated = await tarHelper.createTarBall(path)
+    const releaseId: string = github.context.payload.release.id
     const semver: string = github.context.payload.release.tag_name
 
     if (tarBallCreated) {
-      await apiClient.publishOciArtifact(repository, semver)
+      await apiClient.publishOciArtifact(repository, releaseId, semver)
     }
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)

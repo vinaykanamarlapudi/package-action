@@ -58,7 +58,7 @@ describe('create and publish', () => {
       }
     })
 
-    await publishOciArtifact('monalisa/is-awesome', '1.0.1')
+    await publishOciArtifact('monalisa/is-awesome', '154528', '1.0.1')
 
     expect(axios.post).toHaveBeenCalled()
     expect(axios.post).toHaveBeenCalledTimes(1)
@@ -76,7 +76,7 @@ describe('create and publish', () => {
     })
 
     try {
-      await publishOciArtifact('monalisa/is-awesome', '1.0.1')
+      await publishOciArtifact('monalisa/is-awesome', '154528', '1.0.1')
     } catch (err) {
         expect(axios.post).toHaveBeenCalled()
         expect(axios.post).toHaveBeenCalledTimes(1)
@@ -95,7 +95,7 @@ describe('create and publish', () => {
     })
 
     try {
-      await publishOciArtifact('monalisa/is-awesome', '1.0.1')
+      await publishOciArtifact('monalisa/is-awesome', '154528', '1.0.1')
     } catch (err) {
       expect(axios.post).toHaveBeenCalled()
       expect(axios.post).toHaveBeenCalledTimes(1)
@@ -114,7 +114,7 @@ describe('create and publish', () => {
     })
 
     try {
-      await publishOciArtifact('monalisa/is-awesome', '1.0.1')
+      await publishOciArtifact('monalisa/is-awesome', '154528', '1.0.1')
     } catch (err) {
       expect(axios.post).toHaveBeenCalled()
       expect(axios.post).toHaveBeenCalledTimes(1)
@@ -134,7 +134,7 @@ describe('create and publish', () => {
     })
 
     try {
-      await publishOciArtifact('monalisa/is-awesome', '1.0.1')
+      await publishOciArtifact('monalisa/is-awesome', '154528', '1.0.1')
     } catch (err) {
         expect(axios.post).toHaveBeenCalled()
         expect(axios.post).toHaveBeenCalledTimes(1)

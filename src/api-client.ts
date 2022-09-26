@@ -9,7 +9,7 @@ export function getApiBaseUrl(): string {
 }
 
 // Publish the Action Artifact to GHCR by calling the post API
-export async function publishOciArtifact(repository: string, semver: string): Promise<void> {
+export async function publishOciArtifact(repository: string, releaseId: string, semver: string): Promise<void> {
   try {
     const TOKEN: string = core.getInput('token')
     core.setSecret(TOKEN)
@@ -27,7 +27,9 @@ export async function publishOciArtifact(repository: string, semver: string): Pr
         Accept: 'application/vnd.github.v3+json',
         Authorization: `Bearer ${TOKEN}`,
         'Content-type': 'application/octet-stream',
-        tag: `${semver}`
+      },
+      params: {
+        release_id: releaseId
       }
     })
 
@@ -36,7 +38,7 @@ export async function publishOciArtifact(repository: string, semver: string): Pr
     )
     core.setOutput('package-url', `${response.data.package_url}`)
   } catch (error) {
-    errorResponseHandling(error, semver)
+      errorResponseHandling(error, semver)
   }
 }
 

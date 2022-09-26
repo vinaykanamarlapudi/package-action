@@ -53,7 +53,7 @@ function getApiBaseUrl() {
 }
 exports.getApiBaseUrl = getApiBaseUrl;
 // Publish the Action Artifact to GHCR by calling the post API
-function publishOciArtifact(repository, semver) {
+function publishOciArtifact(repository, releaseId, semver) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const TOKEN = core.getInput('token');
@@ -68,7 +68,9 @@ function publishOciArtifact(repository, semver) {
                     Accept: 'application/vnd.github.v3+json',
                     Authorization: `Bearer ${TOKEN}`,
                     'Content-type': 'application/octet-stream',
-                    tag: `${semver}`
+                },
+                params: {
+                    release_id: releaseId
                 }
             });
             core.info(`Created GHCR package for semver(${semver}) with package URL ${response.data.package_url}`);
@@ -171,9 +173,10 @@ function run() {
             }
             const path = core.getInput('path');
             const tarBallCreated = yield tarHelper.createTarBall(path);
+            const releaseId = github.context.payload.release.id;
             const semver = github.context.payload.release.tag_name;
             if (tarBallCreated) {
-                yield apiClient.publishOciArtifact(repository, semver);
+                yield apiClient.publishOciArtifact(repository, releaseId, semver);
             }
         }
         catch (error) {
