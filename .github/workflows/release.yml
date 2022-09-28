@@ -1,7 +1,7 @@
 name: 'release'
-on: 
+on: # rebuild any PRs and main branch changes
   release:
-
+    types: [created]
 jobs:
   package-and-publish: 
     runs-on: ubuntu-latest
