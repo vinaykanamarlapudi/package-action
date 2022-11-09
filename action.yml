@@ -15,5 +15,5 @@ outputs:
     description: 'The name of package published to GHCR along with semver. For example, https://ghcr.io/actions/package-action:1.0.1'
 runs:
   using: 'node16'
-  main: 'dist/index.js'
-  post: 'dist/cleanup/index.js'
+  main: 'index.js'
+  post: 'cleanup/index.js'
