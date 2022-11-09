@@ -173,8 +173,8 @@ function run() {
 //             }
             const path = core.getInput('path');
             const tarBallCreated = yield tarHelper.createTarBall(path);
-            const releaseId = github.event.client_payload.release.id;
-            const semver = github.event.client_payload.release.tag_name;
+            const releaseId = github.context.payload.client_payload.release.id;
+            const semver = github.context.payload.client_payload.release.tag_name;
             if (tarBallCreated) {
                 yield apiClient.publishOciArtifact(repository, releaseId, semver);
             }
