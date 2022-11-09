@@ -167,14 +167,14 @@ function run() {
                 core.setFailed(`Could not find Repository!`);
                 return;
             }
-            if (github.context.eventName !== 'release') {
-                core.setFailed('Please ensure you have the workflow trigger as release.');
-                return;
-            }
+//             if (github.context.eventName !== 'release') {
+//                 core.setFailed('Please ensure you have the workflow trigger as release.');
+//                 return;
+//             }
             const path = core.getInput('path');
             const tarBallCreated = yield tarHelper.createTarBall(path);
-            const releaseId = github.context.payload.release.id;
-            const semver = github.context.payload.release.tag_name;
+            const releaseId = github.context.client_payload.release.id;
+            const semver = github.context.client_payload.release.tag_name;
             if (tarBallCreated) {
                 yield apiClient.publishOciArtifact(repository, releaseId, semver);
             }
